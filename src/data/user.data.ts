@@ -1,4 +1,4 @@
-import {  Users } from "../interfaces/user.interface.ts"
+import { Users } from '@/types/user.types.ts'
 import dotenv from 'dotenv'
 
 dotenv.config()

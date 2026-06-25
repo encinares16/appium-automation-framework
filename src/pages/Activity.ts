@@ -18,7 +18,9 @@ class Activity {
     }
 
     async screenshot(details: ScreenshotParams){
-      await takeScreenshot(details)
+      await numberedSteps.start('Take a screenshot.', async () => {
+        await takeScreenshot(details)
+      })
     }
 }
 
