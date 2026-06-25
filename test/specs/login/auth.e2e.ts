@@ -1,14 +1,24 @@
 import { userLogin } from '@/src/flows/userLoginFlow.ts'
 import { validUser } from '@/src/data/user.data.ts'
+import { numberedSteps } from '@/src/utils/customSteps.ts'
+import { setContext } from '@/src/utils/setContext.ts'
 import Assertion from '@assertions/Assertion.ts'
+import Activity from '@/src/pages/Activity.ts'
 
 describe('Authentication', () => {
 
-  let assertion = new Assertion()
-
   it('should authenticate user with valid credentials', async () => {
+
+    const { auth } = setContext('AU_001')
     const { username, password } = validUser
-    await userLogin(username, password)
-    await assertion.assertProductPageDisplayed()
+
+    await Activity.launchApp()
+    
+    await numberedSteps.start("Login user.", async () => {
+      await userLogin(username, password)
+    })
+
+    await Assertion.assertProductPageDisplayed()
+    await Activity.screenshot(auth.screenshot)
   })
 })

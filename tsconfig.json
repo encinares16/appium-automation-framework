@@ -25,7 +25,12 @@
         "noFallthroughCasesInSwitch": true, 
         "paths": {
           "@/*": ["./*"],
+          "@data/*": ["./src/data/*"],
           "@pages/*": ["./src/pages/*"],
+          "@utils/*": ["./src/utils/*"],
+          "@/types/*": ["./src/types/*"],
+          "@metadata/*": ["./src/metadata/*"],
+          "@constants/*": ["./src/constants/*"],
           "@assertions/*": ["./src/assertions/*"],
         },
     },

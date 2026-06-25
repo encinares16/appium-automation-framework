@@ -1,7 +1,9 @@
 import ProductPage from '@pages/products/ProductPage.ts'
 
-export default class Assertion {
+class Assertion {
   async assertProductPageDisplayed(){
     await expect(ProductPage.headerTitle).toHaveText(/Product/)
   }
 }
+
+export default new Assertion()
