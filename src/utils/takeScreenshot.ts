@@ -1,5 +1,4 @@
 import { addAttachment } from "@wdio/allure-reporter"
-import { numberedSteps } from "@utils/customSteps.ts"
 import { checkFolderExist } from "@utils/checkFolderExist.ts"
 
 export type ScreenshotParams = {
@@ -20,11 +19,8 @@ export async function takeScreenshot(
       : `Screenshot_${testCaseId}_${index}.png`
 
     const filePath = `./artifacts/screenshots/${feature}/${fileName}`
-
-    await numberedSteps.start(`Take a screenshot. Path: ${filePath}`, async () => {
-        const screenshot: Buffer = await browser.saveScreenshot(filePath)
-        addAttachment(fileName, screenshot, 'image/png')
-    })
+      const screenshot: Buffer = await browser.saveScreenshot(filePath)
+      addAttachment(fileName, screenshot, 'image/png')
     } catch (error) {
         console.error('Failed to take screenshot:', error)
   }
