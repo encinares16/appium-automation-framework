@@ -1,6 +1,6 @@
-import Page from "../Page.ts"
+import Page from "@pages/Page.ts"
 
-export default class LoginPage extends Page {
+class LoginPage extends Page {
   
   get inputUsername() { return $('//android.widget.EditText[@resource-id="com.saucelabs.mydemoapp.android:id/nameET"]') }
   get inputPassword() { return $('//android.widget.EditText[@resource-id="com.saucelabs.mydemoapp.android:id/passwordET"]') }
@@ -12,3 +12,5 @@ export default class LoginPage extends Page {
     await this.buttonLogin.click()
   }
 }
+
+export default new LoginPage()
