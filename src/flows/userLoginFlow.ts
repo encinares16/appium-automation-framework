@@ -1,7 +1,9 @@
-import LoginPage from "../pages/login/LoginPage.ts"
+import LoginPage from '@pages/login/LoginPage.ts'
+import { numberedSteps } from '@utils/customSteps.ts'
 
 export async function userLogin(username: string, password: string){
-  let page = new LoginPage()
-  await page.gotoLogin()
-  await page.loginUser(username, password)
+  await numberedSteps.start('Go to login.', async () => {
+    await LoginPage.gotoLogin()
+    await LoginPage.loginUser(username, password)
+  })
 }

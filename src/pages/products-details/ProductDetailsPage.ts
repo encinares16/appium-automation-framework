@@ -1,4 +1,4 @@
-import Page from "@pages/Page.ts"
+import Page from '@pages/Page.ts'
 
 class ProductDetailsPage extends Page {
 
@@ -26,4 +26,4 @@ class ProductDetailsPage extends Page {
 
 }
 
-export default new ProductDetailsPage();
+export default new ProductDetailsPage()
