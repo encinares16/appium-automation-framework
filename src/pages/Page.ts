@@ -15,7 +15,7 @@ export default class Page {
     await numberedSteps.start('Tap the hamburger menu.', async () => {
       await this.hamburgerMenu.click()
     })
-    await numberedSteps.start('Tap the item login.', async () => {
+    await numberedSteps.start('In the menu, tap the Log In.', async () => {
       await this.menuItemLogin.click()
     })
   }

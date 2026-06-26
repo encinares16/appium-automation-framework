@@ -6,9 +6,27 @@ declare global {
     index?: number | null
   }
 
+  interface Metadata {
+    testID: string
+    description: string
+    owner: string
+    tags: string[]
+    severity: Severity 
+    project: string
+    ticketID: string
+  }
+
+  interface Behaviors {
+    epic: string
+    feature: string
+    story: string
+  }
+
   interface TestContext {
     auth: { 
-      screenshot: Screenshot
+      filename: Screenshot
+      metadata: Metadata
+      behaviors: Behaviors
     },
   }
 }

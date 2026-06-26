@@ -6,7 +6,7 @@ export const numberedSteps = (() => {
     const start = async (title: string, func: any ) => {
       array[array.length - 1] += 1
       const subSteps = array.join('.')
-      return step(`${subSteps}. ${title}`, async () => {
+      return step(`${title}`, async () => {
         array.push(0)
         try {
           if(config.logLevel === 'silent'){

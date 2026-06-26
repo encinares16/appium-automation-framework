@@ -1,10 +1,15 @@
 
-import { details as authDetails } from "@metadata/auth/screenshot.metadata.ts"
+import { details as authFilename } from '@metadata/auth/screenshot.metadata.ts'
+
+import { metadata as authMetadata } from '@metadata/auth/auth.metadata.ts'
+import { behaviors as authBehaviors } from '@metadata/auth/auth.metadata.ts'
 
 export function setContext(testID: string): TestContext {
   return {
     auth: {
-      screenshot: authDetails[testID]
-    }
+      filename: authFilename[testID],
+      metadata: authMetadata[testID],
+      behaviors: authBehaviors,
+    }, 
   }
 }
