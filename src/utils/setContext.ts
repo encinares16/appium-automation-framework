@@ -1,15 +1,22 @@
 
-import { details as authFilename } from '@metadata/auth/screenshot.metadata.ts'
+import { metadata as authMetadata, metadata } from '@metadata/auth/auth.metadata.ts'
 
-import { metadata as authMetadata } from '@metadata/auth/auth.metadata.ts'
-import { behaviors as authBehaviors } from '@metadata/auth/auth.metadata.ts'
+import { project, features } from '@metadata/metadata.ts'
 
-export function setContext(testID: string): TestContext {
+export function setContext(id: string): TestContext {
+
   return {
     auth: {
-      filename: authFilename[testID],
-      metadata: authMetadata[testID],
-      behaviors: authBehaviors,
-    }, 
+      metadata: authMetadata[id],
+      filename: {
+        testCaseId: metadata[id].testCaseId,
+        feature: features.authenticate
+      },
+      behaviors: {
+        epic: project.name,
+        feature: `Sprint ${project.currentSprint}`,
+        story: features.authenticate
+      },
+    },
   }
 }
