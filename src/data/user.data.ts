@@ -7,3 +7,8 @@ export const validUser: Users = {
   username: process.env.STANDARD_USER || '',
   password: process.env.STANDARD_PASSWORD || ''
 }
+
+export const lockedUser: Users = {
+  username: process.env.LOCKED_OUT_USER || '',
+  password: process.env.LOCKED_OUT_PASSWORD || ''
+}
