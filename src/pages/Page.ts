@@ -19,4 +19,13 @@ export default class Page {
       await this.menuItemLogin.click()
     })
   }
+
+  async gotoLogout(){
+    await numberedSteps.start('Tap the hamburger menu.', async () => {
+      await this.hamburgerMenu.click()
+    })
+    await numberedSteps.start('In the menu, tap the Log out.', async () => {
+      await this.menuItemLogout.click()
+    })
+  }
 }
