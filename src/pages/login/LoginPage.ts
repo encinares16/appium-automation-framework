@@ -8,7 +8,13 @@ class LoginPage extends Page {
   get inputPassword() { return $('//android.widget.EditText[@resource-id="com.saucelabs.mydemoapp.android:id/passwordET"]') }
   get buttonLogin() { return $('//android.widget.Button[@content-desc="Tap to login with given credentials"]') }
   
-  get errorMessage() { return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/passwordErrorTV"]') }
+  get nameErrorMessage() {
+    return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/nameErrorTV"]');
+  }
+
+  get passwordErrorMessage() {
+    return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/passwordErrorTV"]');
+  }
 
   async loginUser(username: string, password: string){
     await this.inputUsername.setValue(username)

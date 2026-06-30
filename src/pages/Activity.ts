@@ -5,7 +5,7 @@ import { takeScreenshot } from '@utils/takeScreenshot.ts'
 
 class Activity {
   async launchApp() {
-    await numberedSteps.reset()
+    numberedSteps.reset()
     await numberedSteps.start('Launch the application.', async () => {
       await driver.activateApp(APP_PACKAGE)
     })

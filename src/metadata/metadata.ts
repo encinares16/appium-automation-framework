@@ -20,8 +20,11 @@ export const testCase = {
   },
   description: {
     authenticate: {
-      AU_001: `The system should successfully authenticate the user and be redirected to the product/home page.\n\n### Preconditions\n1. The user account is already registered in the system.\n2. The user has valid login credentials.\n3. The login page is accessible.`,
-      AU_002: `The system should successfully logout.\n\n### Preconditions\n1. The user account is already registered in the system.\n2. The user is logged in.`,
+      AU_001: `The system should successfully authenticate the user with valid credentials and redirect the user to the product/home page.\n\n### Preconditions\n1. The user account is already registered in the system.\n2. The user has valid login credentials.\n3. The login page is accessible.`,
+      AU_002: `The system should reject authentication for a locked user account and display an appropriate error message.\n\n### Preconditions\n1. The user account is already registered in the system.\n2. The user account is locked.\n3. The login page is accessible.`,
+      AU_003: `The system should reject authentication when the username field is empty and display the required field validation message.\n\n### Preconditions\n1. The login page is accessible.\n2. The password field contains a valid value.`,
+      AU_004: `The system should reject authentication when the password field is empty and display the required field validation message.\n\n### Preconditions\n1. The login page is accessible.\n2. The username field contains a valid value.`,
+      AU_101: `The system should successfully log out the authenticated user and redirect the user to the login page.\n\n### Preconditions\n1. The user account is already registered in the system.\n2. The user is currently authenticated.`,
     },
   }
 }

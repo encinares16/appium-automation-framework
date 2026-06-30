@@ -32,7 +32,25 @@ describe('Authentication: Login', () => {
     const filename = initializeTestContext('auth', 'AU_002')    
 
     await userLogin(username, password)
-    await Assertion.assertErrorMessage(LoginPage.errorMessage, "Sorry this user has been locked out.")
+    await Assertion.assertErrorMessage(LoginPage.passwordErrorMessage, "Sorry this user has been locked out.")
+    await Activity.screenshot(filename)
+  })
+
+  it('[AU_003] should reject authentication when username is empty', async () => {
+    const filename = initializeTestContext('auth', 'AU_003')    
+
+    await userLogin('', '')
+    await Assertion.assertErrorMessage(LoginPage.nameErrorMessage, "Username is required")
+    await Activity.screenshot(filename)
+  })
+
+  it('[AU_004] should reject authentication when password is empty', async () => {
+    const { username } = validUser
+
+    const filename = initializeTestContext('auth', 'AU_004')    
+
+    await userLogin(username, '')
+    await Assertion.assertErrorMessage(LoginPage.passwordErrorMessage, "Enter Password")
     await Activity.screenshot(filename)
   })
 })

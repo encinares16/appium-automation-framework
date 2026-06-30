@@ -9,7 +9,7 @@ export function setContext(id: string): TestContext {
     auth: {
       metadata: authMetadata[id],
       filename: {
-        testCaseId: metadata[id].testCaseId,
+        testCaseId: metadata[id].testID,
         feature: features.authenticate
       },
       behaviors: {

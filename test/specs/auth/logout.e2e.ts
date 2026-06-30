@@ -17,9 +17,9 @@ describe('Authentication: Logout', () => {
     await Activity.closeApp()
   })
 
-  it('[AU_003] should allow the user to log out', async () => {
+  it('[AU_101] should allow the user to log out', async () => {
     const { username, password } = validUser
-    const filename = initializeTestContext('auth', 'AU_001') 
+    const filename = initializeTestContext('auth', 'AU_101') 
     
     await userLogin(username, password)
     await LoginPage.gotoLogout()

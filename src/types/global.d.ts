@@ -7,7 +7,7 @@ declare global {
   }
 
   interface Metadata {
-    testCaseId: string
+    testID: string
     description: string
     owner: string
     tags: string[]
