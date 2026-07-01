@@ -6,10 +6,14 @@ import LogoutComponents from '@/src/components/LogoutComponents.ts'
 import { validUser } from '@data/user.data.ts'
 import { userLogin } from '@/src/flows/userLoginFlow.ts'
 import { initializeTestContext } from '@utils/initializeTest.ts'
+import { getTestId } from '@/src/utils/getTestID.ts'
 
 describe('Authentication: Logout', () => {
 
-  beforeEach(async () => {
+  let filename: Screenshot
+
+  beforeEach(async function () {
+    filename = initializeTestContext('auth', getTestId(this.currentTest))
     await Activity.launchApp()
   })
 
@@ -18,8 +22,8 @@ describe('Authentication: Logout', () => {
   })
 
   it('[AU_101] should allow the user to log out', async () => {
+    
     const { username, password } = validUser
-    const filename = initializeTestContext('auth', 'AU_101') 
     
     await userLogin(username, password)
     await LoginPage.gotoLogout()
