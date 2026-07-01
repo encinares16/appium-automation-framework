@@ -18,6 +18,8 @@ class LoginPage extends Page {
   }
 
   async loginUser(username: string, password: string){
+
+    console.log('credentials: ', username)
     
     await numberedSteps.start(`Input the username. ${username}`, async () => {
       await this.inputUsername.waitForDisplayed()
@@ -25,11 +27,14 @@ class LoginPage extends Page {
     })
 
     await numberedSteps.start(`Input the password. ${password}`, async () => {
-    await this.hamburgerMenu.waitForDisplayed()
-    await this.inputPassword.setValue(password)
+      await this.hamburgerMenu.waitForDisplayed()
+      await this.inputPassword.setValue(password)
     })
 
-    await this.buttonLogin.click()
+    await numberedSteps.start(`Tap the login button.`, async () => {
+      await this.buttonLogin.waitForDisplayed()
+      await this.buttonLogin.click()
+    })
   }
 }
 

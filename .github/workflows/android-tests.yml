@@ -12,19 +12,20 @@ env:
 jobs:
   android-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
       - name: Install dependencies
         run: npm ci
-        env:
-          STANDARD_USER: ${{ secrets.STANDARD_USER }}
-          STANDARD_PASSWORD: ${{ secrets.STANDARD_PASSWORD }}
-          LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
-          LOCKED_OUT_PASSWORD: ${{ secrets.LOCKED_OUT_PASSWORD }}
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -35,7 +36,7 @@ jobs:
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-          | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
 
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
@@ -57,6 +58,11 @@ jobs:
           script: |
             adb wait-for-device
 
+            echo "Waiting for Android boot completion..."
+            until adb shell getprop sys.boot_completed | grep -m 1 "1"; do
+              sleep 5
+            done
+
             echo "Device List"
             adb devices
 
@@ -64,10 +70,34 @@ jobs:
             adb shell getprop ro.build.version.release
 
             echo "Install My Demo App application"
-            adb install ./app/app.apk
+            adb install -r "./app/app.apk"
 
-            echo "Running Typecheck"
+            echo "Running TypeScript typecheck"
             npx tsc --project tsconfig.json --noEmit
-                        
+
             echo "Run WebdriverIO + Appium tests"
+            STANDARD_USER="${{ secrets.STANDARD_USER }}" \
+            STANDARD_PASSWORD="${{ secrets.STANDARD_PASSWORD }}" \
+            LOCKED_OUT_USER="${{ secrets.LOCKED_OUT_USER }}" \
+            LOCKED_OUT_PASSWORD="${{ secrets.LOCKED_OUT_PASSWORD }}" \
             npm run wdio
+
+            echo "Generate Allure Report"
+            npm run allure:generate
+
+      - name: Upload Allure report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 30
+
+      - name: Deploy Allure report to gh-pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-report
+          keep_files: false
