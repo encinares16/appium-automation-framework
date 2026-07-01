@@ -7,19 +7,32 @@ The project includes sample automated tests for the **My Demo App (Sauce Labs)**
 ### Tools & Frameworks Used
 
 1. **Appium** – Mobile automation framework used to interact with mobile applications on real devices and emulators for both Android and iOS.
+
 2. **UIAutomator2** – Appium's Android automation driver that enables reliable interaction with native Android applications by leveraging Google's UIAutomator2 framework.
+
 3. **Appium Inspector** – A visual tool for exploring mobile app elements, inspecting UI components, and generating locator strategies to support automation script development.
+
 4. **WebdriverIO** – Test automation framework that provides a clean and efficient way to write, organize, and run automated scripts for mobile testing.
-5. **Mocha** – Test runner used to structure and execute test cases in a readable, BDD/TDD-style format.
-6. **Allure Report 3** – Reporting tool that generates detailed, visual test reports with steps, attachments, and test history to track automation quality.
-7. **GitHub Actions** – CI/CD automation used to generate and deploy Allure reports directly to GitHub Pages for easy access and sharing.
+
+5. **Page Object Model (POM)** – Design pattern used to improve test maintainability and scalability by separating test logic from UI element locators and page actions. Each application screen is represented as a reusable page class containing its elements and interaction methods.
+
+6. **Mocha** – Test runner used to structure and execute test cases in a readable, BDD/TDD-style format.
+
+7. **Custom Logger** – Logging utility implemented with silent mode support to control console output during test execution. It provides structured execution logs, captures important test events, improves debugging, tracks failures, and allows logs to be stored or reviewed without displaying unnecessary information in the command line interface.
+
+8. **Allure Report 3** – Reporting tool that generates detailed, visual test reports with steps, attachments, and test history to track automation quality.
+
+9. **GitHub Actions** – CI/CD automation used to generate and deploy Allure reports directly to GitHub Pages for easy access and sharing.
 
 
 ## 📱 Application Under Test
 **My Demo App (Sauce Labs)**
 
-
 ![2FA Authenticator Screenshot](docs/allure-screenshot.png)
+
+**Custom Logger: Command Line Interface (CLI)**
+
+![2FA Authenticator Screenshot](docs/custom-logger-cli.png)
 
 
 ## Project Structure
