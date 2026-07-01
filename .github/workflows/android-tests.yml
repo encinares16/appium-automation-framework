@@ -1,94 +1,125 @@
-name: Appium WDIO Test
+name: Android Appium Tests
 
 on:
-  push:
-    branches:
-      - ci/android-test-workflow
-  pull_request:
-    branches:
-      - ci/android-test-workflow
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  DOTENV_CONFIG_QUIET: true
+workflow_dispatch:
+push:
+branches:
+  - main
+  - develop
+  - ci/android-test-workflow
 
 jobs:
-  mobile-test:
-    runs-on: ubuntu-latest
+mobile-test:
+runs-on: ubuntu-latest
+timeout-minutes: 60
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+env:
+  DOTENV_CONFIG_QUIET: true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v5
 
-      - name: Install dependencies
-        run: |
-          npm ci
+  - name: Setup Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 22
+      cache: npm
 
-      - name: Start Android Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 33
-          target: google_apis
-          arch: x86_64
-          profile: pixel_5
-          script: |
-            emulator -list-avds
+  - name: Install Dependencies
+    run: npm ci
 
-      # - name: Install APK
-      #   run: |
-      #     adb install ./apk/app.apk
+  - name: Install Appium Drivers
+    run: |
+      npx appium driver install uiautomator2
+      npx appium driver list --installed
 
-      # - name: Verify APK installed
-      #   run: |
-      #     adb shell pm list packages | grep -i app || true
+  - name: Start Android Emulator
+    uses: reactivecircus/android-emulator-runner@v2
+    with:
+      api-level: 33
+      target: google_apis
+      arch: x86_64
+      profile: Nexus 6
+      force-avd-creation: true
+      emulator-boot-timeout: 900
+      disable-animations: true
+      emulator-options: >
+        -no-window
+        -gpu swiftshader_indirect
+        -noaudio
+        -no-boot-anim
+        -no-snapshot
+        -no-metrics
+        -accel off
+      script: |
+        echo "Restarting ADB..."
+        adb kill-server
+        adb start-server
 
-      # - name: Start Appium server
-      #   run: |
-      #     nohup npx appium \
-      #     --log appium.log \
-      #     > appium-server.log 2>&1 &
+        echo "Waiting for emulator..."
+        adb wait-for-device
 
-      #     sleep 10
+        BOOT=""
+        until [[ "$BOOT" == "1" ]]; do
+          BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+          echo "Waiting for Android boot..."
+          sleep 10
+        done
 
-      # - name: Run WDIO Appium Test
-      #   run: |
-      #     npm run wdio
+        adb devices
+        adb shell settings put global window_animation_scale 0
+        adb shell settings put global transition_animation_scale 0
+        adb shell settings put global animator_duration_scale 0
 
-      # - name: Generate Allure Report
-      #   if: always()
-      #   run: |
-      #     npm run allure:generate
+        echo "Android emulator is ready."
 
-      # - name: Archive Test Report
-      #   if: always()
-      #   run: |
-      #     mkdir -p test-results
+  - name: Verify Emulator
+    run: |
+      adb devices
+      adb shell getprop ro.build.version.release
+      adb shell wm size
 
-      #     cp -r allure-report test-results/ || true
-      #     cp -r allure-results test-results/ || true
+  - name: Install APK
+    run: |
+      adb install -r ./apps/app.apk
 
-      #     cp appium.log test-results/ || true
-      #     cp appium-server.log test-results/ || true
+  - name: Start Appium Server
+    run: |
+      nohup npx appium \
+        --address 127.0.0.1 \
+        --port 4723 \
+        --log appium.log \
+        > appium-server.log 2>&1 &
+      sleep 15
 
-      # - name: Upload Allure Report
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: appium-allure-report
-      #     path: test-results
+  - name: Verify Appium Server
+    run: |
+      curl http://127.0.0.1:4723/status
 
-      # - name: Upload Screenshots
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: failed-test-screenshots
-      #     path: |
-      #       ./screenshots/**
-      #       ./test/**/screenshots/**
-      #     if-no-files-found: ignore
+  - name: Execute Tests
+    run: |
+      npm run test:android
+
+  - name: Upload Appium Logs
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: appium-logs
+      path: |
+        appium.log
+        appium-server.log
+
+  - name: Upload Allure Results
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: allure-results
+      path: allure-results
+
+  - name: Upload Screenshots
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: screenshots
+      path: reports/screenshots
