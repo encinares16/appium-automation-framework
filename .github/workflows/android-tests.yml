@@ -39,3 +39,9 @@ jobs:
           profile: pixel_5
           emulator-boot-timeout: 900
           disable-animations: true
+          script: |
+            adb devices
+
+      - name: Verify Emulator
+        run: |
+          adb devices
