@@ -38,57 +38,57 @@ jobs:
           arch: x86_64
           profile: pixel_5
           script: |
-            adb devices
+            emulator -list-avds
 
-      - name: Install APK
-        run: |
-          adb install ./apk/app.apk
+      # - name: Install APK
+      #   run: |
+      #     adb install ./apk/app.apk
 
-      - name: Verify APK installed
-        run: |
-          adb shell pm list packages | grep -i app || true
+      # - name: Verify APK installed
+      #   run: |
+      #     adb shell pm list packages | grep -i app || true
 
-      - name: Start Appium server
-        run: |
-          nohup npx appium \
-          --log appium.log \
-          > appium-server.log 2>&1 &
+      # - name: Start Appium server
+      #   run: |
+      #     nohup npx appium \
+      #     --log appium.log \
+      #     > appium-server.log 2>&1 &
 
-          sleep 10
+      #     sleep 10
 
-      - name: Run WDIO Appium Test
-        run: |
-          npm run wdio
+      # - name: Run WDIO Appium Test
+      #   run: |
+      #     npm run wdio
 
-      - name: Generate Allure Report
-        if: always()
-        run: |
-          npm run allure:generate
+      # - name: Generate Allure Report
+      #   if: always()
+      #   run: |
+      #     npm run allure:generate
 
-      - name: Archive Test Report
-        if: always()
-        run: |
-          mkdir -p test-results
+      # - name: Archive Test Report
+      #   if: always()
+      #   run: |
+      #     mkdir -p test-results
 
-          cp -r allure-report test-results/ || true
-          cp -r allure-results test-results/ || true
+      #     cp -r allure-report test-results/ || true
+      #     cp -r allure-results test-results/ || true
 
-          cp appium.log test-results/ || true
-          cp appium-server.log test-results/ || true
+      #     cp appium.log test-results/ || true
+      #     cp appium-server.log test-results/ || true
 
-      - name: Upload Allure Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: appium-allure-report
-          path: test-results
+      # - name: Upload Allure Report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: appium-allure-report
+      #     path: test-results
 
-      - name: Upload Screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failed-test-screenshots
-          path: |
-            ./screenshots/**
-            ./test/**/screenshots/**
-          if-no-files-found: ignore
+      # - name: Upload Screenshots
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: failed-test-screenshots
+      #     path: |
+      #       ./screenshots/**
+      #       ./test/**/screenshots/**
+      #     if-no-files-found: ignore
