@@ -6,8 +6,11 @@ on:
       - ci/android-test-workflow
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   DOTENV_CONFIG_QUIET: true
+  STANDARD_USER: ${{ secrets.STANDARD_USER }}
+  STANDARD_PASSWORD: ${{ secrets.STANDARD_PASSWORD }}
+  LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
+  LOCKED_OUT_PASSWORD: ${{ secrets.LOCKED_OUT_PASSWORD }}
 
 jobs:
   android-tests:
@@ -26,17 +29,15 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        env:
-          STANDARD_USER: ${{ secrets.STANDARD_USER }}
-          STANDARD_PASSWORD: ${{ secrets.STANDARD_PASSWORD }}
-          LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
-          LOCKED_OUT_PASSWORD: ${{ secrets.LOCKED_OUT_PASSWORD }}
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+
+      - name: TypeScript type check
+        run: npx tsc --project tsconfig.json --noEmit
 
       - name: Enable KVM
         run: |
@@ -46,70 +47,44 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Start Android Emulator
+      - name: Start Android Emulator and Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           target: google_apis
           arch: x86_64
           profile: pixel_7
+          disable-animations: true
           emulator-options: >-
             -no-window
             -gpu swiftshader_indirect
-            -no-snapshot
             -noaudio
             -no-boot-anim
-          disable-animations: true
+            -no-snapshot
           script: |
-            set +e
-
-            echo "1. Waiting for device"
             adb wait-for-device
-            echo "Exit code: $?"
-
-            echo "2. Device list"
             adb devices
-            echo "Exit code: $?"
-
-            echo "3. Android version"
             adb shell getprop ro.build.version.release
-            echo "Exit code: $?"
 
-            echo "4. List APK"
-            ls -lah ./app
-            echo "Exit code: $?"
-
-            echo "5. Install APK"
+            echo "Installing APK..."
             adb install -r ./app/app.apk
-            echo "Exit code: $?"
 
-            echo "6. Typecheck"
-            npx tsc --project tsconfig.json --noEmit
-            echo "Exit code: $?"
-
-            echo "7. Run tests"
+            echo "Running WDIO tests..."
             npm run wdio
-            echo "Exit code: $?"
 
-            echo "8. Generate report"
-            npm run allure:generate
-            echo "Exit code: $?"
-
-      - name: Generating Allure Report
+      - name: Generate Allure Report
+        if: always()
         run: npm run allure:generate
 
-      - name: List Item Inside Directory
-        run: ls
-
-      - name: Upload Allure report artifact
+      - name: Upload Allure Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: allure-report/
+          path: allure-report
           retention-days: 30
 
-      - name: Deploy Allure report to gh-pages
+      - name: Deploy Allure Report to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
