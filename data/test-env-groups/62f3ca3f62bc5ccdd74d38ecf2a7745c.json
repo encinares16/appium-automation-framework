@@ -1,0 +1,1 @@
+{"id":"62f3ca3f62bc5ccdd74d38ecf2a7745c","fullName":"test/specs/auth/login.e2e.ts#Authentication: Login.[AU_004] should reject authentication when password is empty","name":"[AU_004] should reject authentication when password is empty","status":"passed","testResultsByEnv":{"default":"34f713432dc0b8ee95be4a05a3f45be3"}}

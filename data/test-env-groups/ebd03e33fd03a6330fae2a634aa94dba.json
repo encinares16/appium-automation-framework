@@ -1,0 +1,1 @@
+{"id":"ebd03e33fd03a6330fae2a634aa94dba","fullName":"test/specs/auth/login.e2e.ts#Authentication: Login.[AU_003] should reject authentication when username is empty","name":"[AU_003] should reject authentication when username is empty","status":"passed","testResultsByEnv":{"default":"1e630099e1ea405d2011b7668b36cec5"}}

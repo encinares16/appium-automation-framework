@@ -1,0 +1,1 @@
+{"id":"55249d8fbeb7c15cdb23ee332afb53b0","fullName":"test/specs/auth/login.e2e.ts#Authentication: Login.[AU_002] should reject authentication for a locked account","name":"[AU_002] should reject authentication for a locked account","status":"passed","testResultsByEnv":{"default":"26b15390bd2c8e25ab973686e45425e1"}}
