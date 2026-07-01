@@ -12,6 +12,4 @@ class ProductPage extends Page {
   // get productImage() { return $('//androidx.recyclerview.widget.RecyclerView[@content-desc="Displays all products of catalog"]/android.view.ViewGroup[2]/android.widget.ImageView[@content-desc="Product Image"]') }
 }
 
-
-
 export default new ProductPage();
