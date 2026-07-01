@@ -30,10 +30,6 @@ jobs:
         run: |
           npm ci
 
-      - name: Install Appium driver
-        run: |
-          npx appium driver install uiautomator2
-
       - name: Start Appium server
         run: |
           nohup npx appium \
