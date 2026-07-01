@@ -17,7 +17,6 @@ export const config: WebdriverIO.Config = {
       'appium:automationName': 'UiAutomator2',
       'appium:appPackage': 'com.saucelabs.mydemoapp.android',
       'appium:appActivity': '.view.activities.SplashActivity',
-
       'appium:noReset': true
     }],
     logLevel: 'silent',
