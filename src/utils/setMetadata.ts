@@ -1,7 +1,7 @@
 import * as allure from 'allure-js-commons'
 
 export const setMetadata = async ({ testID, description, owner, tags, severity, project, ticketID}: Metadata): Promise<void> => {
-  allure.testCaseId(testID)
+  // allure.testCaseId(testID)
   allure.description(description)
   allure.owner(owner)
   allure.tags(...tags)
