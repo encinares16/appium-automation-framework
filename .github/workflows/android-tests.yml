@@ -1,0 +1,87 @@
+name: Appium WDIO Test
+
+on:
+  push:
+    branches:
+      - ci/android-test-workfow
+  pull_request:
+    branches:
+      - ci/android-test-workfow
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DOTENV_CONFIG_QUIET: true
+
+jobs:
+  mobile-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Install Appium driver
+        run: |
+          npx appium driver install uiautomator2
+
+      - name: Start Appium server
+        run: |
+          nohup npx appium \
+          --log appium.log \
+          > appium-server.log 2>&1 &
+
+          sleep 10
+
+      - name: Start Android Emulator and Run Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          script: |
+            adb devices
+
+            npm run wdio
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          npm run allure:generate
+
+      - name: Archive Test Report
+        if: always()
+        run: |
+          mkdir -p test-results
+
+          cp -r allure-report test-results/
+          cp -r allure-results test-results/ || true
+
+          cp appium.log test-results/ || true
+          cp appium-server.log test-results/ || true
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appium-allure-report
+          path: test-results
+
+      - name: Upload Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-test-screenshots
+          path: |
+            ./screenshots/**
+            ./test/**/screenshots/**
+          if-no-files-found: ignore
