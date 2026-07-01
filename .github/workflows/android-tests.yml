@@ -58,5 +58,10 @@ jobs:
             echo "Install My Demo App application"
             adb install ./app/app.apk
 
-            echo "Running WDIO Appium Tests"
-            npm run wdio
+      - name: Run WebdriverIO + Appium tests
+        run: npm run wdio
+        env:
+          STANDARD_USER: ${{ secrets.STANDARD_USER }}
+          STANDARD_PASSWORD: ${{ secrets.STANDARD_PASSWORD }}
+          LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
+          LOCKED_OUT_PASSWORD: ${{ secrets.LOCKED_OUT_PASSWORD }}
