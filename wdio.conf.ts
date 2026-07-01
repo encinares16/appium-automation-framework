@@ -12,12 +12,9 @@ export const config: WebdriverIO.Config = {
     maxInstances: 1,
     capabilities: [{
       platformName: 'Android',
-
       'appium:deviceName': 'emulator-5554',
-      'appium:platformVersion': '34',
-
+      'appium:platformVersion': '14',
       'appium:automationName': 'UiAutomator2',
-
       'appium:appPackage': 'com.saucelabs.mydemoapp.android',
       'appium:appActivity': '.view.activities.SplashActivity',
 
