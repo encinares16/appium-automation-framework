@@ -1,17 +1,15 @@
 name: Android Appium Tests
 
 on:
-workflow_dispatch:
-push:
-branches:
-  - main
-  - develop
-  - ci/android-test-workflow
+  workflow_dispatch:
+    push:
+      branches:
+        - ci/android-test-workflow
 
 jobs:
-mobile-test:
-runs-on: ubuntu-latest
-timeout-minutes: 60
+  mobile-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
 
 env:
   DOTENV_CONFIG_QUIET: true
