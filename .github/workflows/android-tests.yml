@@ -3,10 +3,10 @@ name: Appium WDIO Test
 on:
   push:
     branches:
-      - ci/android-test-workfow
+      - ci/android-test-workflow
   pull_request:
     branches:
-      - ci/android-test-workfow
+      - ci/android-test-workflow
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
