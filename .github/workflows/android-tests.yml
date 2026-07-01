@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - ci/android-test-workflow
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   DOTENV_CONFIG_QUIET: true
@@ -54,8 +55,8 @@ jobs:
             echo "Android Version"
             adb shell getprop ro.build.version.release
 
-            # Run your tests here
-            # npm ci
-            # npx playwright test
-            # ./gradlew connectedAndroidTest
-            # mvn test
+            echo "Install My Demo App application"
+            adb install ./app/app.apk
+
+            echo "Running WDIO Appium Tests"
+            npm run wdio

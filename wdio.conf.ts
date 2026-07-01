@@ -13,8 +13,8 @@ export const config: WebdriverIO.Config = {
     capabilities: [{
       platformName: 'Android',
 
-      'appium:deviceName': 'Pixel_5',
-      'appium:platformVersion': '33',
+      'appium:deviceName': 'emulator-5554',
+      'appium:platformVersion': '34',
 
       'appium:automationName': 'UiAutomator2',
 
