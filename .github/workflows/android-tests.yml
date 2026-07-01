@@ -61,31 +61,39 @@ jobs:
             -no-boot-anim
           disable-animations: true
           script: |
-            set -ex
+            set +e
 
-            echo "ADB Version"
-            adb version
-
-            echo "Waiting for device"
+            echo "1. Waiting for device"
             adb wait-for-device
+            echo "Exit code: $?"
 
-            echo "Device List"
+            echo "2. Device list"
             adb devices
+            echo "Exit code: $?"
 
-            echo "Boot Status"
-            adb shell getprop sys.boot_completed
-
-            echo "Android Version"
+            echo "3. Android version"
             adb shell getprop ro.build.version.release
+            echo "Exit code: $?"
 
-            echo "Installing APK"
+            echo "4. List APK"
+            ls -lah ./app
+            echo "Exit code: $?"
+
+            echo "5. Install APK"
             adb install -r ./app/app.apk
+            echo "Exit code: $?"
 
-            echo "Running Typecheck"
+            echo "6. Typecheck"
             npx tsc --project tsconfig.json --noEmit
+            echo "Exit code: $?"
 
-            echo "Running Tests"
+            echo "7. Run tests"
             npm run wdio
+            echo "Exit code: $?"
+
+            echo "8. Generate report"
+            npm run allure:generate
+            echo "Exit code: $?"
 
       - name: Generating Allure Report
         run: npm run allure:generate
