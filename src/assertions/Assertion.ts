@@ -6,11 +6,12 @@ class Assertion {
   }
 
   async assertPageHeaderDisplayed(element: ChainablePromiseElement, expected: string | RegExp){
-    await expect(element).toHaveText(expected)
     await expect(element).toBeDisplayed()
+    await expect(element).toHaveText(expected)
   }
 
   async assertErrorMessage(element: ChainablePromiseElement, expected: string | RegExp){
+    await expect(element).toBeDisplayed()
     await expect(element).toHaveText(expected)
   }
 }
