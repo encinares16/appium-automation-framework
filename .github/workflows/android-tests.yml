@@ -87,11 +87,11 @@ jobs:
             echo "Running Tests"
             npm run wdio
 
-            echo "Generating Allure Report"
-            npm run allure:generate
+      - name: Generating Allure Report
+        run: npm run allure:generate
 
-            echo "List Item Inside Directory"
-            ls
+      - name: List Item Inside Directory
+        run: ls
 
       - name: Upload Allure report artifact
         if: always()
