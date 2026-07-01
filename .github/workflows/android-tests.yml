@@ -61,25 +61,37 @@ jobs:
             -no-boot-anim
           disable-animations: true
           script: |
+            set -ex
+
+            echo "ADB Version"
+            adb version
+
+            echo "Waiting for device"
             adb wait-for-device
 
             echo "Device List"
             adb devices
 
+            echo "Boot Status"
+            adb shell getprop sys.boot_completed
+
             echo "Android Version"
             adb shell getprop ro.build.version.release
 
-            echo "Install My Demo App application"
-            adb install -r "./app/app.apk"
+            echo "Installing APK"
+            adb install -r ./app/app.apk
 
-            echo "Running TypeScript typecheck"
+            echo "Running Typecheck"
             npx tsc --project tsconfig.json --noEmit
 
-            echo "Run WebdriverIO + Appium tests"
+            echo "Running Tests"
             npm run wdio
 
-            echo "Generate Allure Report"
+            echo "Generating Allure Report"
             npm run allure:generate
+
+            echo "List Item Inside Directory"
+            ls
 
       - name: Upload Allure report artifact
         if: always()
