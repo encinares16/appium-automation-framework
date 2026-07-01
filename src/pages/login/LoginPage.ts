@@ -17,6 +17,7 @@ class LoginPage extends Page {
   }
 
   async loginUser(username: string, password: string){
+    await this.inputUsername.waitForDisplayed()
     await this.inputUsername.setValue(username)
     await this.inputPassword.setValue(password)
     await this.buttonLogin.click()

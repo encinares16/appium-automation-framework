@@ -13,18 +13,22 @@ export default class Page {
   
   async gotoLogin(){
     await numberedSteps.start('Tap the hamburger menu.', async () => {
+      await this.hamburgerMenu.waitForDisplayed()
       await this.hamburgerMenu.click()
     })
     await numberedSteps.start('In the menu, tap the Log In.', async () => {
+      await this.hamburgerMenu.waitForDisplayed()
       await this.menuItemLogin.click()
     })
   }
 
   async gotoLogout(){
     await numberedSteps.start('Tap the hamburger menu.', async () => {
+      await this.hamburgerMenu.waitForDisplayed()
       await this.hamburgerMenu.click()
     })
     await numberedSteps.start('In the menu, tap the Log out.', async () => {
+      await this.hamburgerMenu.waitForDisplayed()
       await this.menuItemLogout.click()
     })
   }
