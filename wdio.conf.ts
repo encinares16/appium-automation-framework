@@ -11,20 +11,22 @@ export const config: WebdriverIO.Config = {
     ],
     maxInstances: 1,
     capabilities: [{
-        platformName: 'Android',
-        'appium:deviceName': 'AYAV6R3706009193',
-        'appium:platformVersion': '15',
-        'appium:automationName': 'UiAutomator2',
-        'appium:appPackage': 'com.saucelabs.mydemoapp.android',
-        'appium:appActivity': '.view.activities.SplashActivity',
-        'appium:noReset': true,
-        'appium:skipServerInstallation': true,
-        'appium:skipDeviceInitialization': true
+      platformName: 'Android',
+
+      'appium:deviceName': 'Pixel_5',
+      'appium:platformVersion': '33',
+
+      'appium:automationName': 'UiAutomator2',
+
+      'appium:appPackage': 'com.saucelabs.mydemoapp.android',
+      'appium:appActivity': '.view.activities.SplashActivity',
+
+      'appium:noReset': true
     }],
-    logLevel: 'info',
+    logLevel: 'silent',
     logLevels: {
-        webdriver: 'info',
-        '@wdio/appium-service': 'info'
+        webdriver: 'silent',
+        '@wdio/appium-service': 'silent'
     },
     bail: 0,
     waitforTimeout: 10000,

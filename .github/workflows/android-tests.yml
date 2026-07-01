@@ -30,15 +30,7 @@ jobs:
         run: |
           npm ci
 
-      - name: Start Appium server
-        run: |
-          nohup npx appium \
-          --log appium.log \
-          > appium-server.log 2>&1 &
-
-          sleep 10
-
-      - name: Start Android Emulator and Run Tests
+      - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
@@ -48,7 +40,26 @@ jobs:
           script: |
             adb devices
 
-            npm run wdio
+      - name: Install APK
+        run: |
+          adb install ./apk/app.apk
+
+      - name: Verify APK installed
+        run: |
+          adb shell pm list packages | grep -i app || true
+
+      - name: Start Appium server
+        run: |
+          nohup npx appium \
+          --log appium.log \
+          > appium-server.log 2>&1 &
+
+          sleep 10
+
+      - name: Run WDIO Appium Test
+        run: |
+          npm run wdio
+
       - name: Generate Allure Report
         if: always()
         run: |
@@ -59,7 +70,7 @@ jobs:
         run: |
           mkdir -p test-results
 
-          cp -r allure-report test-results/
+          cp -r allure-report test-results/ || true
           cp -r allure-results test-results/ || true
 
           cp appium.log test-results/ || true
