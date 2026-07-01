@@ -26,6 +26,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          STANDARD_USER: ${{ secrets.STANDARD_USER }}
+          STANDARD_PASSWORD: ${{ secrets.STANDARD_PASSWORD }}
+          LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
+          LOCKED_OUT_PASSWORD: ${{ secrets.LOCKED_OUT_PASSWORD }}
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -71,10 +76,6 @@ jobs:
             npx tsc --project tsconfig.json --noEmit
 
             echo "Run WebdriverIO + Appium tests"
-            STANDARD_USER="${{ secrets.STANDARD_USER }}" \
-            STANDARD_PASSWORD="${{ secrets.STANDARD_PASSWORD }}" \
-            LOCKED_OUT_USER="${{ secrets.LOCKED_OUT_USER }}" \
-            LOCKED_OUT_PASSWORD="${{ secrets.LOCKED_OUT_PASSWORD }}" \
             npm run wdio
 
             echo "Generate Allure Report"
