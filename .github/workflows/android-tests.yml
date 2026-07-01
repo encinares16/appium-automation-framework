@@ -7,7 +7,6 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
   DOTENV_CONFIG_QUIET: true
 
 jobs:
@@ -67,5 +66,8 @@ jobs:
             echo "Install My Demo App application"
             adb install ./app/app.apk
 
+            echo "Running Typecheck"
+            tsc --project tsconfig.json --noEmit
+                        
             echo "Run WebdriverIO + Appium tests"
             npm run wdio

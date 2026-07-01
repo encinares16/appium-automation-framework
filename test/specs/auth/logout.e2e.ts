@@ -6,7 +6,7 @@ import LogoutComponents from '@/src/components/LogoutComponents.ts'
 import { validUser } from '@data/user.data.ts'
 import { userLogin } from '@/src/flows/userLoginFlow.ts'
 import { initializeTestContext } from '@utils/initializeTest.ts'
-import { getTestId } from '@/src/utils/getTestID.ts'
+import { getTestId } from '@utils/getTestId.ts'
 
 describe('Authentication: Logout', () => {
 
