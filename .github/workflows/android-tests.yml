@@ -6,12 +6,16 @@ on:
   pull_request:
     branches: [ci/android-test-workflow]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DOTENV_CONFIG_QUIET: true
+
 jobs:
   instrumentation-tests:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [29, 33]
+        api-level: [33]
 
     steps:
       - name: Checkout
@@ -53,6 +57,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
+          arch: arm64-v8a
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
