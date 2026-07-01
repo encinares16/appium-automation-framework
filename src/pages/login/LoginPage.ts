@@ -1,3 +1,4 @@
+import { numberedSteps } from "@/src/utils/customSteps.ts"
 import Page from "@pages/Page.ts"
 
 class LoginPage extends Page {
@@ -17,10 +18,17 @@ class LoginPage extends Page {
   }
 
   async loginUser(username: string, password: string){
-    await this.inputUsername.waitForDisplayed()
-    await this.inputUsername.setValue(username)
+    
+    await numberedSteps.start(`Input the username. ${username}`, async () => {
+      await this.inputUsername.waitForDisplayed()
+      await this.inputUsername.setValue(username)
+    })
+
+    await numberedSteps.start(`Input the password. ${password}`, async () => {
     await this.hamburgerMenu.waitForDisplayed()
     await this.inputPassword.setValue(password)
+    })
+
     await this.buttonLogin.click()
   }
 }
