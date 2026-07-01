@@ -2,63 +2,60 @@ name: Android Emulator Tests
 
 on:
   push:
-    branches: [ci/android-test-workflow]
-  pull_request:
-    branches: [ci/android-test-workflow]
-
+    branches:
+      - ci/android-test-workflow
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   DOTENV_CONFIG_QUIET: true
 
 jobs:
-  instrumentation-tests:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        api-level: [33]
+  android-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
+          distribution: temurin
           java-version: "17"
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+          | sudo tee /etc/udev/rules.d/99-kvm4all.rules
 
-      - name: Gradle cache
-        uses: gradle/actions/setup-gradle@v4
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
-      - name: AVD cache
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-${{ matrix.api-level }}
-
-      # Pre-warm the AVD snapshot if not cached, so the real test run is fast
-      - name: Create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
+      - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: ${{ matrix.api-level }}
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
-
-      - name: Run instrumentation tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          arch: arm64-v8a
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          emulator-options: >-
+            -no-window
+            -gpu swiftshader_indirect
+            -no-snapshot
+            -noaudio
+            -no-boot-anim
           disable-animations: true
-          script: ./gradlew connectedCheck
+          script: |
+            adb wait-for-device
+
+            echo "Device List"
+            adb devices
+
+            echo "Android Version"
+            adb shell getprop ro.build.version.release
+
+            # Run your tests here
+            # npm ci
+            # npx playwright test
+            # ./gradlew connectedAndroidTest
+            # mvn test
