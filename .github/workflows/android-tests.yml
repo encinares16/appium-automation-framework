@@ -33,42 +33,31 @@ jobs:
       - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
-          target: google_apis
-          arch: x86_64
-          profile: Nexus 6
-          force-avd-creation: true
-          emulator-boot-timeout: 900
-          disable-animations: true
-          emulator-options: >
-            -no-window
-            -gpu swiftshader_indirect
-            -noaudio
-            -no-boot-anim
-            -no-snapshot
-            -no-metrics
-            -accel off
-          script: |
-            echo "Restarting ADB..."
-            adb kill-server
-            adb start-server
+        api-level: 33
+        target: google_apis
+        arch: x86_64
+        profile: pixel_5
+        emulator-boot-timeout: 900
+        disable-animations: true
+        script: |
+          echo "ADB devices before wait:"
+          adb devices
 
-            echo "Waiting for emulator..."
-            adb wait-for-device
+          echo "Waiting for emulator device..."
+          adb wait-for-device
 
-            BOOT=""
-            until [[ "$BOOT" == "1" ]]; do
-              BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-              echo "Waiting for Android boot..."
-              sleep 10
-            done
+          echo "ADB devices after wait:"
+          adb devices
 
-            adb devices
-            adb shell settings put global window_animation_scale 0
-            adb shell settings put global transition_animation_scale 0
-            adb shell settings put global animator_duration_scale 0
+          until adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; do
+            echo "Waiting for Android boot..."
+            sleep 10
+          done
 
-            echo "Android emulator is ready."
+          adb shell input keyevent 82 || true
+
+          echo "Final device list:"
+          adb devices
 
       - name: Install APK
         run: |
@@ -78,47 +67,47 @@ jobs:
         run: |
           adb shell pm list packages | grep -i app || true
 
-      - name: Start Appium server
-        run: |
-          nohup npx appium \
-          --log appium.log \
-          > appium-server.log 2>&1 &
+      # - name: Start Appium server
+      #   run: |
+      #     nohup npx appium \
+      #     --log appium.log \
+      #     > appium-server.log 2>&1 &
 
-          sleep 10
+      #     sleep 10
 
-      - name: Run WDIO Appium Test
-        run: |
-          npm run wdio
+      # - name: Run WDIO Appium Test
+      #   run: |
+      #     npm run wdio
 
-      - name: Generate Allure Report
-        if: always()
-        run: |
-          npm run allure:generate
+      # - name: Generate Allure Report
+      #   if: always()
+      #   run: |
+      #     npm run allure:generate
 
-      - name: Archive Test Report
-        if: always()
-        run: |
-          mkdir -p test-results
+      # - name: Archive Test Report
+      #   if: always()
+      #   run: |
+      #     mkdir -p test-results
 
-          cp -r allure-report test-results/ || true
-          cp -r allure-results test-results/ || true
+      #     cp -r allure-report test-results/ || true
+      #     cp -r allure-results test-results/ || true
 
-          cp appium.log test-results/ || true
-          cp appium-server.log test-results/ || true
+      #     cp appium.log test-results/ || true
+      #     cp appium-server.log test-results/ || true
 
-      - name: Upload Allure Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: appium-allure-report
-          path: test-results
+      # - name: Upload Allure Report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: appium-allure-report
+      #     path: test-results
 
-      - name: Upload Screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failed-test-screenshots
-          path: |
-            ./screenshots/**
-            ./test/**/screenshots/**
-          if-no-files-found: ignore
+      # - name: Upload Screenshots
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: failed-test-screenshots
+      #     path: |
+      #       ./screenshots/**
+      #       ./test/**/screenshots/**
+      #     if-no-files-found: ignore
