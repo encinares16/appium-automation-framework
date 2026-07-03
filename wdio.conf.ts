@@ -21,11 +21,13 @@ export const config: WebdriverIO.Config = {
         'appium:appPackage': 'com.saucelabs.mydemoapp.android',
         'appium:appActivity': '.view.activities.SplashActivity',
         'appium:noReset': true,
+        'appium:skipServerInstallation': false,
+        'appium:skipDeviceInitialization': false
     }],
-    logLevel: 'info',
+    logLevel: 'silent',
     logLevels: {
-        webdriver: 'info',
-        '@wdio/appium-service': 'info'
+        webdriver: 'silent',
+        '@wdio/appium-service': 'silent'
     },
     bail: 0,
     waitforTimeout: 10000,
@@ -39,8 +41,10 @@ export const config: WebdriverIO.Config = {
         disableWebdriverStepsReporting: true,
         disableWebdriverScreenshotsReporting: true,
         reportedEnvironmentVars: {
-            'Node Version': process.version,
-            'OS Platform, Release, & Version': `${os.platform()}, ${os.release()}, ${os.version()}`,
+          'Node.js': process.version,
+          'OS Platform': os.platform(),
+          'OS Release (Kernel)': os.release(),
+          'OS Version (Build)': os.version(),
         }
       }]
     ],
