@@ -3,7 +3,7 @@ name: Android Emulator Tests
 on:
   push:
     branches:
-      - ci/android-test-workflow
+      - ci/setup-slack-alerts
 
 env:
   DOTENV_CONFIG_QUIET: true
@@ -95,3 +95,39 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-report
           keep_files: false
+
+      # Send a notification ONLY if the pipeline fails
+      - name: Notify Slack on Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          payload: |
+            {
+              "text": "❌ *CI/CD Build Failed!*",
+              "attachments": [
+                {
+                  "color": "#danger",
+                  "text": "Repo: ${{ github.repository }}\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}"
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # Send a notification ONLY if the pipeline succeeds
+      - name: Notify Slack on Success
+        if: success()
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          payload: |
+            {
+              "text": "🚀 *CI/CD Build Succeeded!*",
+              "attachments": [
+                {
+                  "color": "#good",
+                  "text": "The changes have successfully passed all pipeline checks."
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
