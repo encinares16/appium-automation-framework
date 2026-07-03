@@ -113,6 +113,7 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: incoming-webhook
 
       # Send a notification ONLY if the pipeline succeeds
       - name: Notify Slack on Success
@@ -131,3 +132,4 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: incoming-webhook
