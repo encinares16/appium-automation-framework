@@ -33,7 +33,83 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Send a notification ONLY if the pipeline fails
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: TypeScript type check
+        run: npx tsc --project tsconfig.json --noEmit
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Start Android Emulator and Run Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          emulator-options: >-
+            -no-window
+            -gpu swiftshader_indirect
+            -noaudio
+            -no-boot-anim
+            -no-snapshot
+          script: |
+            adb wait-for-device
+            adb devices
+            adb shell getprop ro.build.version.release
+
+            echo "Installing APK..."
+            adb install -r ./app/app.apk
+
+            echo "Running WDIO tests..."
+            npm run wdio
+
+      - name: Extract Allure summary
+        if: always()
+        id: allure
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
+          PASSED=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "passed" || true)
+          FAILED=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "failed" || true)
+          BROKEN=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "broken" || true)
+
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "broken=$BROKEN" >> $GITHUB_OUTPUT
+
+      - name: Generate Allure Report
+        if: always()
+        run: npm run allure:generate
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 30
+
+      - name: Deploy Allure Report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-report
+          keep_files: false
+
       - name: Notify Slack on Failure
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
@@ -45,13 +121,19 @@ jobs:
               "text": "❌ *CI/CD Build Failed!*",
               "attachments": [
                 {
-                  "color": "#danger",
-                  "text": "Repo: ${{ github.repository }}\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}"
+                  "color": "#ff0000",
+                  "fields": [
+                    { "title": "Repo", "value": "${{ github.repository }}", "short": true },
+                    { "title": "Commit", "value": "${{ github.sha }}", "short": true },
+                    { "title": "Author", "value": "${{ github.actor }}", "short": true },
+                    { "title": "Passed", "value": "${{ steps.allure.outputs.passed }}", "short": true },
+                    { "title": "Failed", "value": "${{ steps.allure.outputs.failed }}", "short": true },
+                    { "title": "Broken", "value": "${{ steps.allure.outputs.broken }}", "short": true }
+                  ]
                 }
               ]
             }
 
-      # Send a notification ONLY if the pipeline succeeds
       - name: Notify Slack on Success
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
@@ -63,8 +145,19 @@ jobs:
               "text": "🚀 *CI/CD Build Succeeded!*",
               "attachments": [
                 {
-                  "color": "#good",
-                  "text": "The changes have successfully passed all pipeline checks."
+                  "color": "#36a64f",
+                  "fields": [
+                    { "title": "Repo", "value": "${{ github.repository }}", "short": true },
+                    { "title": "Run", "value": "#${{ github.run_number }}", "short": true },
+                    { "title": "Passed", "value": "${{ steps.allure.outputs.passed }}", "short": true },
+                    { "title": "Failed", "value": "${{ steps.allure.outputs.failed }}", "short": true },
+                    { "title": "Broken", "value": "${{ steps.allure.outputs.broken }}", "short": true },
+                    {
+                      "title": "Allure Report",
+                      "value": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/",
+                      "short": false
+                    }
+                  ]
                 }
               ]
             }
