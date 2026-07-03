@@ -1,5 +1,7 @@
 import * as os from 'os'
 
+const isCI = !!process.env.CI
+
 export const config: WebdriverIO.Config = {
     runner: 'local',
     tsConfigPath: './tsconfig.json',
@@ -7,13 +9,14 @@ export const config: WebdriverIO.Config = {
     specs: [
         './test/specs/**/*.ts'
     ],
+    specFileRetries: process.env.CI ? 2 : 0,
     exclude: [
     ],
     maxInstances: 1,
     capabilities: [{
         platformName: 'Android',
-        'appium:deviceName': 'AYAV6R3706009193',
-        'appium:platformVersion': '15',
+        'appium:deviceName': isCI ? 'emulator-5554': process.env.DEVICE_NAME,
+        'appium:platformVersion': isCI ? '14' : process.env.DEVICE_VERSION,
         'appium:automationName': 'UiAutomator2',
         'appium:appPackage': 'com.saucelabs.mydemoapp.android',
         'appium:appActivity': '.view.activities.SplashActivity',
