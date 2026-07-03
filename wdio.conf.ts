@@ -21,8 +21,6 @@ export const config: WebdriverIO.Config = {
         'appium:appPackage': 'com.saucelabs.mydemoapp.android',
         'appium:appActivity': '.view.activities.SplashActivity',
         'appium:noReset': true,
-        'appium:skipServerInstallation': true,
-        'appium:skipDeviceInitialization': true
     }],
     logLevel: 'info',
     logLevels: {
