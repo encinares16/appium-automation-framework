@@ -78,6 +78,7 @@ jobs:
         if: always()
         id: allure
         run: |
+          ls
           sudo apt-get update && sudo apt-get install -y jq
 
           PASSED=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "passed" || true)
@@ -87,21 +88,6 @@ jobs:
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
           echo "broken=$BROKEN" >> $GITHUB_OUTPUT
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Checkout gh-pages
-        run: |
-          git fetch origin gh-pages || true
-
-          if git ls-remote --heads origin gh-pages | grep gh-pages; then
-            git worktree add gh-pages origin/gh-pages
-          else
-            mkdir -p gh-pages
-          fi
 
       - name: Upload Allure Results
         if: always()
