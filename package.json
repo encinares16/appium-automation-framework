@@ -18,6 +18,7 @@
   "scripts": {
     "wdio": "wdio run ./wdio.conf.ts",
     "allure:generate": "allure generate allure-results -o allure-report",
+    "allure:regenerate": "rm -rf allure-report && cp -r allure-history/history.jsonl allure-results/history.jsonl && allure generate ./allure-results -o ./allure-report && allure open ./allure-report",
     "allure:open": "allure open allure-report"
   },
   "dependencies": {
