@@ -103,14 +103,21 @@ jobs:
             mkdir -p gh-pages
           fi
 
+      - name: Upload Allure Results
+        if: always()
+        run: |
+          if [ -d "allure-results" ]; then
+            cp -r allure-results gh-pages/allure-results
+            echo "Copying Allure results succesfuly..."
+          fi
+
       - name: Restore Allure History
         if: always()
         run: |
-          mkdir -p allure-history
+          ls 
 
           if [ -f "gh-pages/allure-history/history.jsonl" ]; then
-            cp gh-pages/allure-history/history.jsonl \
-              allure-history/history.jsonl
+            cp gh-pages/allure-history/history.jsonl allure-results/history.jsonl
 
             echo "History restored."
           else
@@ -120,7 +127,7 @@ jobs:
       - name: Generate Allure Report
         if: always()
         run: |
-          npm run allure:generate
+          npx allure generate allure-results -o allure-report
           echo "Generating report done..."
 
       - name: Prepare GitHub Pages
@@ -129,14 +136,13 @@ jobs:
           mkdir -p gh-pages
 
           if [ -d allure-report ]; then
-            cp -r allure-report gh-pages/
+            cp -rf allure-report gh-pages/allure-report
           fi
 
           mkdir -p gh-pages/allure-history
 
           if [ -f allure-history/history.jsonl ]; then
-            cp allure-history/history.jsonl \
-              gh-pages/allure-history/
+            cp allure-history/history.jsonl gh-pages/allure-history/
           fi
 
       - name: Deploy Report

@@ -16,11 +16,11 @@ export const config: WebdriverIO.Config = {
     maxInstances: 1,
     capabilities: [{
         platformName: 'Android',
-        // 'appium:deviceName': isCI ? 'emulator-5554': process.env.DEVICE_NAME,
-        // 'appium:platformVersion': isCI ? '14' : process.env.DEVICE_VERSION,
+        'appium:deviceName': isCI ? 'emulator-5554': process.env.DEVICE_NAME,
+        'appium:platformVersion': isCI ? '14' : process.env.DEVICE_VERSION,
         'appium:automationName': 'UiAutomator2',
-        // 'appium:appPackage': 'com.saucelabs.mydemoapp.android',
-        // 'appium:appActivity': '.view.activities.SplashActivity',
+        'appium:appPackage': 'com.saucelabs.mydemoapp.android',
+        'appium:appActivity': '.view.activities.SplashActivity',
         'appium:noReset': true,
         'appium:skipServerInstallation': false,
         'appium:skipDeviceInitialization': false
@@ -53,11 +53,10 @@ export const config: WebdriverIO.Config = {
         ui: 'bdd',
         timeout: 60000
     },
-    afterTest: async function (test, result) {
-      console.log('[Test Status]: ', result.passed)
-      if (!result.passed) {
+    afterTest: async function (test, context, { passed }) {
+      if (!passed) {
+        console.log("[Failed Test]", context._runnable.title)
         const screenshot = await browser.takeScreenshot()
-
         await browser.saveScreenshot(
           `./artifacts/error/${Date.now()}-${test.title.replace(/[^a-zA-Z0-9-_]/g, "_")}.png`
         )
