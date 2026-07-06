@@ -102,13 +102,20 @@ jobs:
             npm run allure:generate
           fi
 
-      - name: Upload Allure Report
+      - name: Prepare GitHub Pages
         if: always()
-        uses: actions/upload-artifact@v4
+        run: |
+          mkdir -p gh-pages/allure-report
+          cp -r allure-report/* gh-pages/allure-report/
+
+      - name: Deploy Allure Report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: allure-report
-          path: ./allure-report
-          retention-days: 30
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./gh-pages
+          keep_files: false
 
       - name: Deploy Allure Report to GitHub Pages
         if: always()
