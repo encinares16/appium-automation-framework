@@ -15,7 +15,7 @@ env:
 jobs:
   android-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     permissions:
       contents: write
@@ -50,36 +50,73 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Start Android Emulator and Run Tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          profile: pixel_7
-          disable-animations: true
-          emulator-options: >-
-            -no-window
-            -gpu swiftshader_indirect
-            -noaudio
-            -no-boot-anim
-          script: |
-            adb wait-for-device
-            adb devices
-            adb shell getprop ro.build.version.release
+      - name: Install Android SDK Components
+        run: |
+          yes | sdkmanager --licenses
 
-            echo "Installing APK..."
-            adb install -r ./app/app.apk
+          sdkmanager \
+            "platform-tools" \
+            "emulator" \
+            "platforms;android-34" \
+            "system-images;android-34;google_apis;x86_64"
 
-            echo "Running WDIO tests..."
-            npm run wdio:spec
+      - name: Create Android Emulator
+        run: |
+          echo "no" | avdmanager create avd \
+            -n test \
+            -k "system-images;android-34;google_apis;x86_64"
 
-      - name: Extract Allure summary
+      - name: Start Android Emulator
+        run: |
+          $ANDROID_HOME/emulator/emulator \
+            -avd test \
+            -no-window \
+            -gpu swiftshader_indirect \
+            -noaudio \
+            -no-boot-anim \
+            -no-snapshot \
+            &
+
+      - name: Wait For Device
+        run: |
+          adb wait-for-device
+
+      - name: Wait For Android Boot
+        timeout-minutes: 10
+        run: |
+          until adb shell getprop sys.boot_completed | grep -m 1 "1"; do
+            echo "Waiting for emulator boot..."
+            sleep 5
+          done
+
+          adb shell settings put global window_animation_scale 0
+          adb shell settings put global transition_animation_scale 0
+          adb shell settings put global animator_duration_scale 0
+
+      - name: ADB Devices
+        run: |
+          adb devices
+
+      - name: Check Android Version
+        run: |
+          adb shell getprop ro.build.version.release
+
+      - name: Install APK
+        run: |
+          echo "Installing APK..."
+          adb install -r ./app/app.apk
+
+      - name: Run WDIO Tests
+        run: |
+          echo "Running Tests..."
+          npm run wdio:spec
+
+      - name: Extract Allure Summary
         if: always()
         id: allure
         run: |
-          ls
-          sudo apt-get update && sudo apt-get install -y jq
+          sudo apt-get update
+          sudo apt-get install -y jq
 
           PASSED=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "passed" || true)
           FAILED=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "failed" || true)
@@ -92,19 +129,18 @@ jobs:
       - name: Upload Allure Results
         if: always()
         run: |
+          mkdir -p gh-pages
+
           if [ -d "allure-results" ]; then
             cp -r allure-results gh-pages/allure-results
-            echo "Copying Allure results succesfuly..."
           fi
 
       - name: Restore Allure History
         if: always()
         run: |
-          ls 
-
           if [ -f "gh-pages/allure-history/history.jsonl" ]; then
+            mkdir -p allure-results
             cp gh-pages/allure-history/history.jsonl allure-results/history.jsonl
-
             echo "History restored."
           else
             echo "No previous history found."
@@ -114,7 +150,6 @@ jobs:
         if: always()
         run: |
           npm run allure:generate
-          echo "Generating report done..."
 
       - name: Prepare GitHub Pages
         if: always()
@@ -143,7 +178,13 @@ jobs:
       - name: Set Short SHA
         if: always()
         id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Stop Android Emulator
+        if: always()
+        run: |
+          adb emu kill || true
 
       - name: Notify Slack on Failure
         if: failure()
@@ -153,42 +194,17 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             {
-              "attachments": [
-                {
-                  "color": "#FF0000",
-                  "blocks": [
-                    {
-                      "type": "header",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "🚀 CI Mobile Test Automation Build Failed"
-                      }
-                    },
-                    {
-                      "type": "section",
-                      "fields": [
-                        {
-                          "type": "mrkdwn",
-                          "text": "*Repo Name:*\n:git-branch: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}|${{ github.event.repository.name }}>"
-                        },
-                        {
-                          "type": "mrkdwn",
-                          "text": "*Build Run:*\n#${{ github.run_number }}"
-                        },
-                        {
-                          "type": "mrkdwn",
-                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/commit/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :delete:"
-                        },
-                        {
-                          "type": "mrkdwn",
-                          "text": "*Author:*\n:github: ${{ github.actor }}"
-                        }
-                      ]
-                    },
-                  ]
-                }
-              ]
-              }
+              "attachments": [{
+                "color": "#FF0000",
+                "blocks": [{
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚀 CI Mobile Test Automation Build Failed"
+                  }
+                }]
+              }]
+            }
 
       - name: Notify Slack on Success
         if: success()
@@ -198,60 +214,14 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             {
-              "attachments": [
-                {
-                  "color": "#2EB67D",
-                  "blocks": [
-                    {
-                      "type": "header",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "🚀 CI Mobile Test Automation Build Succeeded"
-                      }
-                    },
-                    {
-                      "type": "section",
-                      "fields": [
-                        {
-                          "type": "mrkdwn",
-                          "text": "*Repo Name:*\n:git-branch: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}|${{ github.event.repository.name }}>"
-                        },
-                        {
-                          "type": "mrkdwn",
-                          "text": "*Build Run:*\n#${{ github.run_number }}"
-                        },
-                        {
-                          "type": "mrkdwn",
-                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/commit/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :check:"
-                        },
-                        {
-                          "type": "mrkdwn",
-                          "text": "*Author:*\n:github: ${{ github.actor }}"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "section",
-                      "text": {
-                        "type": "mrkdwn",
-                        "text": "*Results*\n• *Passed:* ${{ steps.allure.outputs.passed }}\n• *Failed:* ${{ steps.allure.outputs.failed }}\n• *Broken:* ${{ steps.allure.outputs.broken }}"
-                      }
-                    },
-                    {
-                      "type": "actions",
-                      "elements": [
-                        {
-                          "type": "button",
-                          "text": {
-                            "type": "plain_text",
-                            "text": ":allure-logo: Allure Report"
-                          },
-                          "url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/",
-                          "style": "primary"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
+              "attachments": [{
+                "color": "#2EB67D",
+                "blocks": [{
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚀 CI Mobile Test Automation Build Succeeded"
+                  }
+                }]
+              }]
             }
