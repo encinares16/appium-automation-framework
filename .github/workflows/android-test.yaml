@@ -92,8 +92,8 @@ jobs:
       - name: Generate Allure Report
         if: always()
         run: |
-          if [ -d "allure-history" ] && \
-             [ -f "allure-history/history.jsonl" ] && \
+          if [ -d "./allure-history" ] && \
+             [ -f "./allure-history/history.jsonl" ] && \
              [ -d "allure-results" ]; then
             echo "Existing Allure history found. Generating report with history..."
             npm run allure:regenerate
@@ -107,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: allure-report
+          path: ./allure-report
           retention-days: 30
 
       - name: Deploy Allure Report to GitHub Pages
@@ -116,7 +116,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-report
+          publish_dir: ./allure-report
           keep_files: false
 
       - name: Set Short SHA
