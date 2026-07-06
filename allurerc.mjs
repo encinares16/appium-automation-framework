@@ -1,8 +1,19 @@
 import { defineConfig } from "allure";
 
 export default defineConfig({
-  output: "./allure-report",
+  name: "Automation Test Report",
+  output: "./gh-pages/allure-report",
+
   historyPath: "./allure-history/history.jsonl",
   appendHistory: true,
-  historyLimit: 20,
+  historyLimit: 50,
+
+  plugins: {
+    awesome: {
+      options: {
+        reportLanguage: "en",
+        singleFile: false
+      }
+    }
+  }
 });

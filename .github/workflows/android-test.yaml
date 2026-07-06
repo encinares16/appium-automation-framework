@@ -88,43 +88,54 @@ jobs:
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
           echo "broken=$BROKEN" >> $GITHUB_OUTPUT
 
-      - name: Prepare GitHub Pages
-        if: always()
-        run: |
-          mkdir -p gh-pages
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Delete Allure Report
-        if: always()
+      - name: Checkout gh-pages
         run: |
-          if [ -d "gh-pages/allure-report" ]; then
-            rm -rf gh-pages/allure-report
-            echo "Previous Allure report folder deleted succesfuly..."
+          git fetch origin gh-pages || true
+
+          if git ls-remote --heads origin gh-pages | grep gh-pages; then
+            git worktree add gh-pages origin/gh-pages
+          else
+            mkdir -p gh-pages
           fi
-
-      - name: Copy Allure Results
+      - name: Restore Allure History
         if: always()
         run: |
-          if [ -d "allure-results" ]; then
-            cp -r allure-results gh-pages/allure-results
-            echo "Copying Allure results succesfuly..."
-          fi
+          mkdir -p allure-history
 
-      - name: Copy Allure History
-        if: always()
-        run: |
-          if [ -f "./allure-history/history.jsonl" ]; then
-            mkdir -p gh-pages/allure-history
-            cp -r gh-pages/allure-history/history.jsonl gh-pages/allure-results/history.jsonl
-            echo "Copying history done..."
+          if [ -f "gh-pages/allure-history/history.jsonl" ]; then
+            cp gh-pages/allure-history/history.jsonl \
+              allure-history/history.jsonl
+
+            echo "History restored."
+          else
+            echo "No previous history found."
           fi
 
       - name: Generate Allure Report
         if: always()
         run: |
-          npm run allure:generate
-          echo "Generating report done..."
+          npx allure generate allure-results
 
-      - name: Deploy to GitHub Pages
+      - name: Prepare GitHub Pages
+        if: always()
+        run: |
+          mkdir -p gh-pages
+
+          cp -r allure-report gh-pages/
+
+          mkdir -p gh-pages/allure-history
+
+          if [ -f allure-history/history.jsonl ]; then
+            cp allure-history/history.jsonl \
+              gh-pages/allure-history/
+          fi
+
+      - name: Deploy Report
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
