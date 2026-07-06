@@ -73,7 +73,7 @@ jobs:
             adb install -r ./app/app.apk
 
             echo "Running WDIO tests..."
-            npm run wdio:spec --spec=logout
+            wdio run ./wdio.conf.ts --spec test/specs/*/logout.e2e.ts
 
       - name: Extract Allure summary
         if: always()
