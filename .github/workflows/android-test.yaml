@@ -118,17 +118,34 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             {
-              "text": "❌ *CI/CD Build Failed!*",
               "attachments": [
                 {
-                  "color": "#ff0000",
-                  "fields": [
-                    { "title": "Repo", "value": "${{ github.repository }}", "short": true },
-                    { "title": "Commit", "value": "${{ github.sha }}", "short": true },
-                    { "title": "Author", "value": "${{ github.actor }}", "short": true },
-                    { "title": "Passed", "value": "${{ steps.allure.outputs.passed }}", "short": true },
-                    { "title": "Failed", "value": "${{ steps.allure.outputs.failed }}", "short": true },
-                    { "title": "Broken", "value": "${{ steps.allure.outputs.broken }}", "short": true }
+                  "color": "#FF0000",
+                  "blocks": [
+                    {
+                      "type": "header",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🚀 CI Mobile Test Automation Build Failed"
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "fields": [
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Repo Name:*\n:git-branch: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}|${{ github.event.repository.name }}>"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Commit:*\n:link: ${{ github.sha }}"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Author:*\n:github: ${{ github.actor }}"
+                        }
+                      ]
+                    },
                   ]
                 }
               ]
@@ -142,20 +159,50 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             {
-              "text": "🚀 *CI/CD Build Succeeded!*",
               "attachments": [
                 {
-                  "color": "#36a64f",
-                  "fields": [
-                    { "title": "Repo", "value": "${{ github.repository }}", "short": true },
-                    { "title": "Run", "value": "#${{ github.run_number }}", "short": true },
-                    { "title": "Passed", "value": "${{ steps.allure.outputs.passed }}", "short": true },
-                    { "title": "Failed", "value": "${{ steps.allure.outputs.failed }}", "short": true },
-                    { "title": "Broken", "value": "${{ steps.allure.outputs.broken }}", "short": true },
+                  "color": "#2EB67D",
+                  "blocks": [
                     {
-                      "title": "Allure Report",
-                      "value": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/",
-                      "short": false
+                      "type": "header",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🚀 CI Mobile Test Automation Build Succeeded"
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "fields": [
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Repo Name:*\n:git-branch: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}|${{ github.event.repository.name }}>"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Build Run:*\n:gear: #${{ github.run_number }}"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*Results*\n• *Passed:* ${{ steps.allure.outputs.passed }}\n• *Failed:* ${{ steps.allure.outputs.failed }}\n• *Broken:* ${{ steps.allure.outputs.broken }}"
+                      }
+                    },
+                    {
+                      "type": "actions",
+                      "elements": [
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "Allure Report"
+                          },
+                          "url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/",
+                          "style": "primary"
+                        }
+                      ]
                     }
                   ]
                 }
