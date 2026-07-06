@@ -127,7 +127,7 @@ jobs:
       - name: Generate Allure Report
         if: always()
         run: |
-          npx allure generate allure-results -o allure-report
+          npm run allure:generate
           echo "Generating report done..."
 
       - name: Prepare GitHub Pages
