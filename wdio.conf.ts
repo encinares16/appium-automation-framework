@@ -58,7 +58,7 @@ export const config: WebdriverIO.Config = {
         const screenshot = await browser.takeScreenshot()
 
         await browser.saveScreenshot(
-          `./errorShots/${Date.now()}-${test.title.replace(/[^a-zA-Z0-9-_]/g, "_")}.png`
+          `./artifacts/error/${Date.now()}-${test.title.replace(/[^a-zA-Z0-9-_]/g, "_")}.png`
         )
 
         allure.addAttachment(
