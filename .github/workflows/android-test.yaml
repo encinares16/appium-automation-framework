@@ -124,6 +124,19 @@ jobs:
           npm run allure:generate
           echo "Generating report done..."
 
+      - name: List File
+        if: always()
+        run: |
+          ls 
+
+      - name: List Files in gh-pages Branch
+        if: always()
+        run: |
+          git fetch origin gh-pages || true
+
+          echo "=== Files in origin/gh-pages ==="
+          git ls-tree -r --name-only origin/gh-pages || echo "gh-pages branch not found"
+
       - name: Deploy to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
