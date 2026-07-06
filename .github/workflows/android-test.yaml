@@ -105,26 +105,15 @@ jobs:
 
           if [ -f "./allure-history/history.jsonl" ]; then
             mkdir -p gh-pages/allure-history
-            cp ./allure-history/history.jsonl gh-pages/allure-results/history.jsonl
+            cp gh-pages/allure-history/history.jsonl gh-pages/allure-results/history.jsonl
             echo "Copying Allure history done..."
           fi
 
       - name: Generate Allure Report
         if: always()
         run: |
-          if [ -f "./allure-history/history.jsonl" ] && [ -d "allure-results" ]; then
-            echo "Existing Allure history found."
-
-            rm -rf allure-report
-            mkdir -p allure-results/history
-            cp ./allure-history/history.jsonl ./allure-results/history/history.jsonl
-
-            npm run allure:generate
-          else
-            echo "First build (or no history found)."
-
-            npm run allure:generate
-          fi
+          npm run allure:generate
+          echo "Generating report done..."
 
       - name: Deploy to GitHub Pages
         if: always()
