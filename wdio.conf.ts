@@ -1,4 +1,5 @@
 import * as os from 'os'
+import allure from "@wdio/allure-reporter"
 
 const isCI = !!process.env.CI
 
@@ -52,4 +53,19 @@ export const config: WebdriverIO.Config = {
         ui: 'bdd',
         timeout: 60000
     },
+    afterTest: async function (test, { passed }) {
+      if (!passed) {
+        const screenshot = await browser.takeScreenshot()
+
+        await browser.saveScreenshot(
+          `./errorShots/${Date.now()}-${test.title.replace(/[^a-zA-Z0-9-_]/g, "_")}.png`
+        )
+
+        allure.addAttachment(
+          "Failure Screenshot",
+          Buffer.from(screenshot, "base64"),
+          "image/png"
+        )
+      }
+   },
 }
