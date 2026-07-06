@@ -53,19 +53,15 @@ export const config: WebdriverIO.Config = {
         ui: 'bdd',
         timeout: 60000
     },
-    afterTest: async function (test, { passed }) {
-      if (!passed) {
+    afterTest: async function (test, result) {
+      console.log('[Test Status]: ', result)
+      if (!result.passed) {
         const screenshot = await browser.takeScreenshot()
 
         await browser.saveScreenshot(
           `./artifacts/error/${Date.now()}-${test.title.replace(/[^a-zA-Z0-9-_]/g, "_")}.png`
         )
-
-        allure.addAttachment(
-          "Failure Screenshot",
-          Buffer.from(screenshot, "base64"),
-          "image/png"
-        )
+        allure.addAttachment("Failure Screenshot", Buffer.from(screenshot, "base64"), "image/png")
       }
    },
 }
