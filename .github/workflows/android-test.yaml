@@ -64,22 +64,15 @@ jobs:
             -noaudio
             -no-boot-anim
           script: |
-            run_tests() {
-              adb wait-for-device
-              adb devices
-              adb shell getprop ro.build.version.release
+            adb wait-for-device
+            adb devices
+            adb shell getprop ro.build.version.release
 
-              echo "Installing APK..."
-              adb install -r ./app/app.apk
+            echo "Installing APK..."
+            adb install -r ./app/app.apk
 
-              echo "Running WDIO tests..."
-              npm run wdio:spec
-            }
-
-            run_tests || {
-              echo "Tests failed."
-              exit 1
-            }
+            echo "Running WDIO tests..."
+            npm run wdio:spec
 
       - name: Extract Allure summary
         if: always()
