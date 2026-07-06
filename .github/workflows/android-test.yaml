@@ -91,7 +91,16 @@ jobs:
 
       - name: Generate Allure Report
         if: always()
-        run: npm run allure:generate
+        run: |
+          if [ -d "allure-history" ] && \
+             [ -f "allure-history/history.jsonl" ] && \
+             [ -d "allure-results" ]; then
+            echo "Existing Allure history found. Generating report with history..."
+            npm run allure:regenerate
+          else
+            echo "First build (or no history found). Generating fresh Allure report..."
+            npm run allure:generate
+          fi
 
       - name: Upload Allure Report
         if: always()
