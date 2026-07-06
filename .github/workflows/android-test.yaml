@@ -155,7 +155,7 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/commit/${{ github.event.repository.name }}/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :delete:"
+                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/commit/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :delete:"
                         },
                         {
                           "type": "mrkdwn",
@@ -200,7 +200,7 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/commit/${{ github.event.repository.name }}/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :check:"
+                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/commit/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :check:"
                         },
                         {
                           "type": "mrkdwn",
