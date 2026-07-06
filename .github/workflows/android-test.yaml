@@ -102,6 +102,7 @@ jobs:
           else
             mkdir -p gh-pages
           fi
+
       - name: Restore Allure History
         if: always()
         run: |
@@ -120,6 +121,7 @@ jobs:
         if: always()
         run: |
           npm run allure:generate
+          echo "Generating report done..."
 
       - name: Prepare GitHub Pages
         if: always()

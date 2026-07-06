@@ -16,11 +16,11 @@ export const config: WebdriverIO.Config = {
     maxInstances: 1,
     capabilities: [{
         platformName: 'Android',
-        'appium:deviceName': isCI ? 'emulator-5554': process.env.DEVICE_NAME,
-        'appium:platformVersion': isCI ? '14' : process.env.DEVICE_VERSION,
+        // 'appium:deviceName': isCI ? 'emulator-5554': process.env.DEVICE_NAME,
+        // 'appium:platformVersion': isCI ? '14' : process.env.DEVICE_VERSION,
         'appium:automationName': 'UiAutomator2',
-        'appium:appPackage': 'com.saucelabs.mydemoapp.android',
-        'appium:appActivity': '.view.activities.SplashActivity',
+        // 'appium:appPackage': 'com.saucelabs.mydemoapp.android',
+        // 'appium:appActivity': '.view.activities.SplashActivity',
         'appium:noReset': true,
         'appium:skipServerInstallation': false,
         'appium:skipDeviceInitialization': false
