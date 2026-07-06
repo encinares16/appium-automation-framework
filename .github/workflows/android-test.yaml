@@ -93,17 +93,20 @@ jobs:
         run: |
           mkdir -p gh-pages
 
-          if [ -d "allure-report" ]; then
-            cp -r allure-report gh-pages/allure-report
+          if [ -d "gh-pages/allure-report" ]; then
+            rm -rf gh-pages/allure-report
+            echo "Previous Allure report folder deleted succesfuly..."
           fi
 
           if [ -d "allure-results" ]; then
             cp -r allure-results gh-pages/allure-results
+            echo "Copying Allure results succesfuly..."
           fi
 
           if [ -f "./allure-history/history.jsonl" ]; then
             mkdir -p gh-pages/allure-history
             cp ./allure-history/history.jsonl gh-pages/allure-results/history.jsonl
+            echo "Copying Allure history done..."
           fi
 
       - name: Generate Allure Report
