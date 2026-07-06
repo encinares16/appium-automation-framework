@@ -147,7 +147,7 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Commit:*\n:commit-git: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.event.github.sha }}|${{ github.sha }}>"
+                          "text": "*Commit:*\n:commit-git: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.sha }}|${{ github.sha::0:7 }}>"
                         },
                         {
                           "type": "mrkdwn",
