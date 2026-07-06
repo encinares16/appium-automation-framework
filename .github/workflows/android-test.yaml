@@ -106,8 +106,13 @@ jobs:
         if: always()
         run: |
           mkdir -p gh-pages
-          cp -r allure-report gh-pages/allure-report
-          cp -r allure-results gh-pages/allure-results
+
+          if [ -d "allure-report" ] && [ -d "allure-results" ]; then
+            cp -r allure-report gh-pages/allure-report
+            cp -r allure-results gh-pages/allure-results
+          else
+            echo "Skipping GitHub Pages preparation. allure-report and/or allure-results directory not found."
+          fi
 
       - name: Deploy to GitHub Pages
         if: always()
@@ -119,6 +124,7 @@ jobs:
           keep_files: true
 
       - name: Set Short SHA
+        if: always()
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
@@ -155,7 +161,6 @@ jobs:
                         {
                           "type": "mrkdwn",
                           "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/commit/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :delete:"
-                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/commit/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :check:"
                         },
                         {
                           "type": "mrkdwn",
