@@ -63,17 +63,23 @@ jobs:
             -gpu swiftshader_indirect
             -noaudio
             -no-boot-anim
-            -no-snapshot
           script: |
-            adb wait-for-device
-            adb devices
-            adb shell getprop ro.build.version.release
+            run_tests() {
+              adb wait-for-device
+              adb devices
+              adb shell getprop ro.build.version.release
 
-            echo "Installing APK..."
-            adb install -r ./app/app.apk
+              echo "Installing APK..."
+              adb install -r ./app/app.apk
 
-            echo "Running WDIO tests..."
-            npm run wdio:spec
+              echo "Running WDIO tests..."
+              npm run wdio:spec
+            }
+
+            run_tests || {
+              echo "Tests failed."
+              exit 1
+            }
 
       - name: Extract Allure summary
         if: always()
@@ -107,9 +113,10 @@ jobs:
         run: |
           mkdir -p gh-pages
 
-          if [ -d "allure-report" ] && [ -d "allure-results" ]; then
+          if [ -d "allure-report" ] && [ -d "allure-results" ] && [ -d "allure-history" ]; then
             cp -r allure-report gh-pages/allure-report
             cp -r allure-results gh-pages/allure-results
+            cp -r ./allure-history/history.jsonl gh-pages/allure-history
           else
             echo "Skipping GitHub Pages preparation. allure-report and/or allure-results directory not found."
           fi
