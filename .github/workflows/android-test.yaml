@@ -138,18 +138,18 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Commit:*\n:link: ${{ github.sha }}"
+                          "text": "*Commit:*\n:commit-git: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.event.github.sha }}|${{ github.sha }}>"
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Author:*\n:github: ${{ github.actor }}"
+                          "text": "*Author:*\n:github: ${{ github.event.repository.owner.avatar_url }} ${{ github.actor }}"
                         }
                       ]
                     },
                   ]
                 }
               ]
-            }
+              }
 
       - name: Notify Slack on Success
         if: success()
@@ -179,7 +179,15 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Build Run:*\n:gear: #${{ github.run_number }}"
+                          "text": "*Build Run:*\n#${{ github.run_number }}"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Commit:*\n:commit-git: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.event.github.sha }}|${{ github.sha }}>"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Author:*\n:github: ${{ github.event.repository.owner.avatar_url }} ${{ github.actor }}"
                         }
                       ]
                     },
@@ -197,7 +205,7 @@ jobs:
                           "type": "button",
                           "text": {
                             "type": "plain_text",
-                            "text": "Allure Report"
+                            "text": ":allure-logo: Allure Report"
                           },
                           "url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/",
                           "style": "primary"
