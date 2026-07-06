@@ -151,11 +151,11 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Commit:*\n:commit-git: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}"
+                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.sha }}|${{ steps.vars.outputs.sha_short }} :delete:"
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Author:*\n:github: ${{ github.event.repository.owner.avatar_url }} ${{ github.actor }}"
+                          "text": "*Author:*\n:github: ${{ github.actor }}"
                         }
                       ]
                     },
@@ -196,11 +196,11 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Commit:*\n:commit-git: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.event.github.sha }}|${{ github.sha }}>"
+                          "text": "*Commit:*\n:commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.sha }}|${{ steps.vars.outputs.sha_short }} :check:"
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Author:*\n:github: ${{ github.event.repository.owner.avatar_url }} ${{ github.actor }}"
+                          "text": "*Author:*\n:github: ${{ github.actor }}"
                         }
                       ]
                     },
