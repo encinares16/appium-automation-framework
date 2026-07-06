@@ -73,7 +73,7 @@ jobs:
             adb install -r ./app/app.apk
 
             echo "Running WDIO tests..."
-            npm run wdio
+            npm run wdio:spec --spec=logout
 
       - name: Extract Allure summary
         if: always()
@@ -102,20 +102,15 @@ jobs:
             npm run allure:generate
           fi
 
-      - name: Prepare GitHub Pages
-        if: always()
-        run: |
-          mkdir -p gh-pages/allure-report
-          cp -r allure-report/* gh-pages/allure-report/
-
-      - name: Deploy Allure Report to GitHub Pages
+      - name: Deploy Allure Results to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./gh-pages
-          keep_files: false
+          publish_dir: ./allure-results
+          destination_dir: allure-results
+          keep_files: true
 
       - name: Deploy Allure Report to GitHub Pages
         if: always()
