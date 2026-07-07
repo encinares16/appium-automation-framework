@@ -1,4 +1,7 @@
 import * as os from 'os'
+import allure from '@wdio/allure-reporter'
+
+const isCI = !!process.env.CI
 
 export const config: WebdriverIO.Config = {
     runner: 'local',
@@ -7,24 +10,25 @@ export const config: WebdriverIO.Config = {
     specs: [
         './test/specs/**/*.ts'
     ],
+    specFileRetries: process.env.CI ? 0 : 0,
     exclude: [
     ],
     maxInstances: 1,
     capabilities: [{
         platformName: 'Android',
-        'appium:deviceName': 'AYAV6R3706009193',
-        'appium:platformVersion': '15',
+        'appium:deviceName': isCI ? 'emulator-5554': process.env.DEVICE_NAME,
+        'appium:platformVersion': isCI ? '14' : process.env.DEVICE_VERSION,
         'appium:automationName': 'UiAutomator2',
         'appium:appPackage': 'com.saucelabs.mydemoapp.android',
         'appium:appActivity': '.view.activities.SplashActivity',
         'appium:noReset': true,
-        'appium:skipServerInstallation': true,
-        'appium:skipDeviceInitialization': true
+        'appium:skipServerInstallation': false,
+        'appium:skipDeviceInitialization': false
     }],
-    logLevel: 'info',
+    logLevel: 'silent',
     logLevels: {
-        webdriver: 'info',
-        '@wdio/appium-service': 'info'
+        webdriver: 'silent',
+        '@wdio/appium-service': 'silent'
     },
     bail: 0,
     waitforTimeout: 10000,
@@ -38,8 +42,10 @@ export const config: WebdriverIO.Config = {
         disableWebdriverStepsReporting: true,
         disableWebdriverScreenshotsReporting: true,
         reportedEnvironmentVars: {
-            'Node Version': process.version,
-            'OS Platform, Release, & Version': `${os.platform()}, ${os.release()}, ${os.version()}`,
+          'Node.js': process.version,
+          'OS Platform': os.platform(),
+          'OS Release (Kernel)': os.release(),
+          'OS Version (Build)': os.version(),
         }
       }]
     ],
@@ -47,4 +53,17 @@ export const config: WebdriverIO.Config = {
         ui: 'bdd',
         timeout: 60000
     },
+    afterTest: async function (test, context, { passed }) {
+      if (!passed) {
+        console.log('[Failed Test]', context._runnable.title)
+        const screenshot = await browser.takeScreenshot()
+        await browser.saveScreenshot(
+          `./artifacts/error/${Date.now()}-${test.title.replace(/[^a-zA-Z0-9-_]/g, '_')}.png`
+        )
+        allure.addAttachment('Failure Screenshot', Buffer.from(screenshot, 'base64'), 'image/png')
+
+        await browser.terminateApp('com.saucelabs.mydemoapp.android') 
+        await browser.activateApp('com.saucelabs.mydemoapp.android')
+      }
+   },
 }

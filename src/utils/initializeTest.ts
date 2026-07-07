@@ -1,3 +1,4 @@
+import { loggerCLI } from "./customLoggerCLI.ts"
 import { setContext } from "./setContext.ts"
 import { setBehaviors, setMetadata } from "./setMetadata.ts"
 
@@ -9,6 +10,7 @@ export function initializeTestContext<K extends keyof TestContext>(
 
   setMetadata(metadata)
   setBehaviors(behaviors)
+  loggerCLI(metadata)
 
   return filename
 }

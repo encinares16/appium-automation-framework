@@ -1,0 +1,290 @@
+name: Android Emulator Tests
+
+on:
+  push:
+    branches:
+      - ci/setup-slack-alerts
+
+env:
+  DOTENV_CONFIG_QUIET: true
+  STANDARD_USER: ${{ secrets.STANDARD_USER }}
+  STANDARD_PASSWORD: ${{ secrets.STANDARD_PASSWORD }}
+  LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
+  LOCKED_OUT_PASSWORD: ${{ secrets.LOCKED_OUT_PASSWORD }}
+  ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  android-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: TypeScript type check
+        run: npx tsc --project tsconfig.json --noEmit
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Start Android Emulator and Run Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: >-
+            -no-window
+            -gpu swiftshader_indirect
+            -noaudio
+            -no-boot-anim
+            -no-snapshot
+            -camera-front none
+            -camera-back none
+            -no-metrics
+          script: |
+            adb wait-for-device
+            adb devices
+            adb shell getprop ro.build.version.release
+
+            echo "Installing APK..."
+            adb install -r ./app/app.apk
+
+            echo "Running WDIO tests..."
+            npm run wdio
+
+      - name: Extract Allure summary
+        if: always()
+        id: allure
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
+          PASSED=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "passed" || true)
+          FAILED=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "failed" || true)
+          BROKEN=$(find allure-results -name "*.json" -exec jq '.status' {} \; | grep -c "broken" || true)
+
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "broken=$BROKEN" >> $GITHUB_OUTPUT
+
+      - name: Prepare Temporary GitHub Pages
+        if: always()
+        run: mkdir -p ./temp-gh-pages
+
+      - name: Checkout gh-pages Branch
+        if: always()
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Restore Allure History
+        if: always()
+        run: |
+          mkdir -p allure-results
+          mkdir -p prev-allure-history
+
+          if [ -f "gh-pages/allure-history/history.jsonl" ]; then
+            cat gh-pages/allure-history/history.jsonl
+            echo "Found history.jsonl"
+
+            cat gh-pages/allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> prev-allure-history/history.jsonl
+            echo "copying allure history done."
+
+            cat prev-allure-history/history.jsonl
+            echo "Reading previous history done."
+          else
+            echo "No previous history found."
+          fi
+
+      - name: Restore Previous Allure Results
+        if: always()
+        run: |
+          if [ -d "gh-pages/allure-results" ] && \
+             [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
+             
+            echo "Found previous allure-results"
+            cp -R gh-pages/allure-results/. allure-results/
+
+            cp -R prev-allure-history/history.jsonl allure-results/
+            echo "copying allure history done."
+          else
+            echo "No previous allure-results found."
+          fi
+
+      - name: Generate Allure Report
+        if: always()
+        run: npm run allure:generate
+
+      - name: List Files
+        if: always()
+        run: ls -R
+
+      - name: List All Branch
+        if: always()
+        run: git branch -a
+
+      - name: Copy Files to temp-gh-pages
+        if: always()
+        run: |
+          [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
+          [ -f "prev-allure-history/history.jsonl" ] && cat prev-allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> allure-history/history.jsonl
+          [ -d "allure-history" ] && cp -R allure-history temp-gh-pages/
+          [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
+
+      - name: List Files in temp-gh-pages
+        if: always()
+        run: ls -R ./temp-gh-pages
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./temp-gh-pages
+          keep_files: true
+
+      - name: Set Short SHA
+        if: always()
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack on Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "#FF0000",
+                  "blocks": [
+                    {
+                      "type": "header",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🚀 CI Mobile Test Automation Build Failed"
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "fields": [
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Repo Name:*\n:git-branch-white: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}|${{ github.event.repository.name }}>"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Build Run:*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Commit:*\n:git-commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/commit/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :delete:"
+                        },
+                        {
+                          "type": "mrkdwn",
+                           "text": "*Commit by:*\n:github-white: ${{ github.event.head_commit.author.name }}"
+                        }
+                      ]
+                    },
+                  ]
+                }
+              ]
+              }
+
+      - name: Notify Slack on Success
+        if: success()
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "#2EB67D",
+                  "blocks": [
+                    {
+                      "type": "header",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🚀 CI Mobile Test Automation Build Succeeded"
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "fields": [
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Repo Name:*\n:git-branch-white: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}|${{ github.event.repository.name }}>"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Build Run:*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Commit:*\n:git-commit: <https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/commit/${{ github.sha }}|${{ steps.vars.outputs.sha_short }}> :check:"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Commit by:*\n:github-white: ${{ github.event.head_commit.author.name }}"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*Results*\n• *Passed:* ${{ steps.allure.outputs.passed }}\n• *Failed:* ${{ steps.allure.outputs.failed }}\n• *Broken:* ${{ steps.allure.outputs.broken }}"
+                      }
+                    },
+                    {
+                      "type": "actions",
+                      "elements": [
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": ":allure-logo: Allure Report"
+                          },
+                          "url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/",
+                          "style": "primary"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
