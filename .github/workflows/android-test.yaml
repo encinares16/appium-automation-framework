@@ -111,6 +111,7 @@ jobs:
           mkdir -p allure-results
 
           if [ -f "gh-pages/allure-history/history.jsonl" ]; then
+            cat gh-pages/allure-history/history.jsonl
             echo "Found history.jsonl"
             cat gh-pages/allure-history/history.jsonl >> allure-results/history.jsonl && printf '\n' >> allure-results/history.jsonl
             echo "copying allure history done."
@@ -123,7 +124,6 @@ jobs:
         run: |
           if [ -d "gh-pages/allure-results" ] && \
              [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
-
             echo "Found previous allure-results"
             cp -R gh-pages/allure-results/. allure-results/
           else
