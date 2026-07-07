@@ -112,8 +112,8 @@ jobs:
 
           if [ -f "gh-pages/allure-history/history.jsonl" ]; then
             echo "Found history.jsonl"
-            cp gh-pages/allure-history/history.jsonl allure-results/history.jsonl
-            echo "copying allure report done."
+            rsync -a gh-pages/allure-history/history.jsonl allure-results/history.jsonl
+            echo "copying allure history done."
           else
             echo "No previous history found."
           fi
