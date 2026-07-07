@@ -156,7 +156,7 @@ jobs:
         if: always()
         run: |
           [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
-          [ -f "prev-allure-history/history.jsonl" ] && cat allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> prev-allure-history/history.jsonl
+          [ -f "prev-allure-history/history.jsonl" ] && cat prev-allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> allure-history/history.jsonl
           [ -d "allure-history" ] && cp -R allure-history temp-gh-pages/
           [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
 
@@ -206,7 +206,7 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Build Run:*\n#${{ github.run_number }}"
+                          "text": "*Build Run:*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
                         },
                         {
                           "type": "mrkdwn",
@@ -214,7 +214,7 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Author:*\n:github-white: ${{ github.actor }}"
+                           "text": "*Commit by:*\n:github-white: ${{ github.event.head_commit.author.name }}"
                         }
                       ]
                     },
@@ -251,7 +251,7 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Build Run:*\n#${{ github.run_number }}"
+                          "text": "*Build Run:*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
                         },
                         {
                           "type": "mrkdwn",
@@ -259,7 +259,7 @@ jobs:
                         },
                         {
                           "type": "mrkdwn",
-                          "text": "*Author:*\n:github-white: ${{ github.actor }}"
+                          "text": "*Commit by:*\n:github-white: ${{ github.event.head_commit.author.name }}"
                         }
                       ]
                     },
