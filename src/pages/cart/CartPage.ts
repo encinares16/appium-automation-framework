@@ -2,17 +2,17 @@ import Page from "@pages/Page.ts"
 
 class ProductPage extends Page {
 
-  get noItemTitle() { return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/noItemTitleTV"]') }
-  get noItemLogo() { return $('//android.widget.LinearLayout[@resource-id="com.saucelabs.mydemoapp.android:id/cartInfoLL"]/android.widget.ImageView') }
-  get noItemMessage() { return $('//android.widget.TextView[@text="Oh no! Your cart is empty. Fill it up with swag to complete your purchase."]') }
-  get shoppingButton() { return $('//android.widget.Button[@resource-id="com.saucelabs.mydemoapp.android:id/shoppingBt"]') }
-  
-  get headerTitle() { return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/productTV"]') }
-  get cardIconQuantity() { return $('//android.widget.RelativeLayout[@content-desc="Displays number of items in your cart"]/android.widget.ImageView') }
+  get noItemTitle() { return $('id:com.saucelabs.mydemoapp.android:id/noItemTitleTV') }
+  get noItemLogo() { return $('id:com.saucelabs.mydemoapp.android:id/cartInfoLL') }
+  get noItemMessage() { return $('~Oh no! Your cart is empty. Fill it up with swag to complete your purchase.') }
+  get shoppingButton() { return $('id:com.saucelabs.mydemoapp.android:id/shoppingBt') }
 
-  get totalItem() { return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/itemsTV"]') }
-  get totalPrice() { return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/totalPriceTV"]') }
-  get checkoutButton() { return $('//android.widget.Button[@content-desc="Confirms products for checkout"]') }
+  get headerTitle() { return $('id:com.saucelabs.mydemoapp.android:id/productTV') }
+  get cardIconQuantity() { return $('~Displays number of items in your cart') }
+
+  get totalItem() { return $('id:com.saucelabs.mydemoapp.android:id/itemsTV') }
+  get totalPrice() { return $('id:com.saucelabs.mydemoapp.android:id/totalPriceTV') }
+  get checkoutButton() { return $('~Confirms products for checkout') }
 
   removeItem(index: number) { return $(`(//android.widget.TextView[@content-desc="Removes product from cart"])[${index}]`) }
 

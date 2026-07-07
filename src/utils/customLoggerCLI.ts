@@ -8,5 +8,5 @@ export function loggerCLI({ testID, description}: Metadata){
     console.log(`[${testID}]`)
     console.log(`Description: ${description}`)
     console.log()
-}
+  }
 }
