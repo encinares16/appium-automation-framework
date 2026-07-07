@@ -138,6 +138,10 @@ jobs:
         if: always()
         run: ls -R
 
+      - name: List All Branch
+        if: always()
+        run: git branch -a
+
       - name: Copy Files to temp-gh-pages
         if: always()
         run: |
