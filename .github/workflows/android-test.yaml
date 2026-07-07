@@ -12,6 +12,7 @@ env:
   LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
   LOCKED_OUT_PASSWORD: ${{ secrets.LOCKED_OUT_PASSWORD }}
   ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   android-tests:
@@ -155,7 +156,7 @@ jobs:
         if: always()
         run: |
           [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
-          [ -f "prev-allure-history/history.jsonl" ] && cat prev-allure-history/history.jsonl >> allure-history/history.jsonl && printf '\n' >> allure-history/history.jsonl
+          [ -f "prev-allure-history/history.jsonl" ] && cat allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> prev-allure-history/history.jsonl
           [ -d "allure-history" ] && cp -R allure-history temp-gh-pages/
           [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
 
