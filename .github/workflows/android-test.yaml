@@ -2,8 +2,7 @@ name: Android Emulator Tests
 
 on:
   push:
-    branches:
-      - ci/setup-slack-alerts
+    branches: [main, develop]
 
 env:
   DOTENV_CONFIG_QUIET: true
@@ -277,7 +276,7 @@ jobs:
                           "type": "button",
                           "text": {
                             "type": "plain_text",
-                            "text": ":allure-logo: Allure Report"
+                            "text": ":allure-logo: View Allure Report"
                           },
                           "url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/",
                           "style": "primary"
