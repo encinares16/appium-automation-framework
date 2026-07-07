@@ -63,6 +63,8 @@ jobs:
             -gpu swiftshader_indirect
             -noaudio
             -no-boot-anim
+            -no-snapshot
+            -camera-front none
             -camera-back none
             -no-metrics
           script: |
