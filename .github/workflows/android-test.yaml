@@ -88,54 +88,52 @@ jobs:
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
           echo "broken=$BROKEN" >> $GITHUB_OUTPUT
 
-      - name: Prepare GitHub Pages
-        if: always()
-        run: |
-          mkdir -p gh-pages
+      - name: Prepare Temporary GitHub Pages
+        run: mkdir -p temp-gh-pages
 
-      - name: Delete Allure Report
-        if: always()
+      - name: Checkout gh-pages Branch
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Restore Allure History
         run: |
-          if [ -d "gh-pages/allure-report" ]; then
-            rm -rf gh-pages/allure-report
-            echo "Previous Allure report folder deleted succesfuly..."
+          mkdir -p allure-results
+
+          if [ -f "gh-pages/allure-history/history.jsonl" ]; then
+            echo "Found history.jsonl"
+            cp gh-pages/allure-history/history.jsonl allure-results/history.jsonl
+          else
+            echo "No previous history found."
           fi
 
-      - name: Copy Allure Results
-        if: always()
+      - name: Restore Previous Allure Results
         run: |
-          if [ -d "allure-results" ]; then
-            cp -r allure-results gh-pages/allure-results
-            echo "Copying Allure results succesfuly..."
-          fi
+          if [ -d "gh-pages/allure-results" ] && \
+             [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
 
-      - name: Copy Allure History
-        if: always()
-        run: |
-          if [ -f "./allure-history/history.jsonl" ]; then
-            mkdir -p gh-pages/allure-history
-            cp -r gh-pages/allure-history/history.jsonl gh-pages/allure-results/history.jsonl
-            echo "Copying history done..."
+            echo "Found previous allure-results"
+            cp -R gh-pages/allure-results/. allure-results/
+          else
+            echo "No previous allure-results found."
           fi
 
       - name: Generate Allure Report
-        if: always()
-        run: |
-          npm run allure:generate
-          echo "Generating report done..."
+        run: npm run allure:generate
 
-      - name: List File
-        if: always()
-        run: |
-          ls 
+      - name: List Files
+        run: ls -R
 
-      - name: List Files in gh-pages Branch
-        if: always()
+      - name: Copy Files to temp-gh-pages
         run: |
-          git fetch origin gh-pages || true
+          [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
+          [ -d "allure-history" ] && cp -R allure-history temp-gh-pages/
+          [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
 
-          echo "=== Files in origin/gh-pages ==="
-          git ls-tree -r --name-only origin/gh-pages || echo "gh-pages branch not found"
+      - name: List Files in temp-gh-pages
+        run: ls -R temp-gh-pages
 
       - name: Deploy to GitHub Pages
         if: always()
@@ -143,8 +141,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./gh-pages
-          keep_files: true
+          publish_dir: ./temp-gh-pages
+          keep_files: false
 
       - name: Set Short SHA
         if: always()
