@@ -26,9 +26,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -109,12 +109,17 @@ jobs:
         if: always()
         run: |
           mkdir -p allure-results
+          mkdir -p prev-allure-history
 
           if [ -f "gh-pages/allure-history/history.jsonl" ]; then
             cat gh-pages/allure-history/history.jsonl
             echo "Found history.jsonl"
-            cat gh-pages/allure-history/history.jsonl >> allure-results/history.jsonl && printf '\n' >> allure-results/history.jsonl
+
+            cat gh-pages/allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> prev-allure-history/history.jsonl
             echo "copying allure history done."
+
+            cat prev-allure-history/history.jsonl
+            echo "Reading previous history done."
           else
             echo "No previous history found."
           fi
@@ -146,6 +151,7 @@ jobs:
         if: always()
         run: |
           [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
+          [ -f "prev-allure-history/history.jsonl" ] && cat prev-allure-history/history.jsonl >> allure-history/history.jsonl && printf '\n' >> allure-history/history.jsonl
           [ -d "allure-history" ] && cp -R allure-history temp-gh-pages/
           [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
 
