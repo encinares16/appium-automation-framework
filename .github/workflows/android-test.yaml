@@ -91,9 +91,11 @@ jobs:
           echo "broken=$BROKEN" >> $GITHUB_OUTPUT
 
       - name: Prepare Temporary GitHub Pages
-        run: mkdir -p temp-gh-pages
+        if: always()
+        run: mkdir -p ./temp-gh-pages
 
       - name: Checkout gh-pages Branch
+        if: always()
         continue-on-error: true
         uses: actions/checkout@v4
         with:
@@ -101,6 +103,7 @@ jobs:
           path: gh-pages
 
       - name: Restore Allure History
+        if: always()
         run: |
           mkdir -p allure-results
 
@@ -112,6 +115,7 @@ jobs:
           fi
 
       - name: Restore Previous Allure Results
+        if: always()
         run: |
           if [ -d "gh-pages/allure-results" ] && \
              [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
@@ -123,19 +127,23 @@ jobs:
           fi
 
       - name: Generate Allure Report
+        if: always()
         run: npm run allure:generate
 
       - name: List Files
+        if: always()
         run: ls -R
 
       - name: Copy Files to temp-gh-pages
+        if: always()
         run: |
           [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
           [ -d "allure-history" ] && cp -R allure-history temp-gh-pages/
           [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
 
       - name: List Files in temp-gh-pages
-        run: ls -R temp-gh-pages
+        if: always()
+        run: ls -R ./temp-gh-pages
 
       - name: Deploy to GitHub Pages
         if: always()
@@ -144,7 +152,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./temp-gh-pages
-          force_orphan: true
+          keep_files: true
 
       - name: Set Short SHA
         if: always()
