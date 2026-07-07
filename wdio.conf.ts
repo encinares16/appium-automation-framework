@@ -1,4 +1,5 @@
 import * as os from 'os'
+import allure from '@wdio/allure-reporter'
 
 const isCI = !!process.env.CI
 
@@ -9,7 +10,7 @@ export const config: WebdriverIO.Config = {
     specs: [
         './test/specs/**/*.ts'
     ],
-    specFileRetries: process.env.CI ? 2 : 0,
+    specFileRetries: process.env.CI ? 0 : 0,
     exclude: [
     ],
     maxInstances: 1,
@@ -52,4 +53,17 @@ export const config: WebdriverIO.Config = {
         ui: 'bdd',
         timeout: 60000
     },
+    afterTest: async function (test, context, { passed }) {
+      if (!passed) {
+        console.log('[Failed Test]', context._runnable.title)
+        const screenshot = await browser.takeScreenshot()
+        await browser.saveScreenshot(
+          `./artifacts/error/${Date.now()}-${test.title.replace(/[^a-zA-Z0-9-_]/g, '_')}.png`
+        )
+        allure.addAttachment('Failure Screenshot', Buffer.from(screenshot, 'base64'), 'image/png')
+
+        await browser.terminateApp('com.saucelabs.mydemoapp.android') 
+        await browser.activateApp('com.saucelabs.mydemoapp.android')
+      }
+   },
 }
