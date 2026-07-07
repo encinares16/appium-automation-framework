@@ -142,7 +142,7 @@ jobs:
         if: always()
         run: |
           [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
-          [ -d "allure-history" ] && rsync -a allure-history/ temp-gh-pages/
+          [ -d "allure-history" ] && rsync -a allure-history temp-gh-pages/
           [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
 
       - name: List Files in temp-gh-pages
