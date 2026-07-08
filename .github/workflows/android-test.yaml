@@ -127,25 +127,26 @@ jobs:
       - name: Restore Previous Allure Results
         if: always()
         run: |
-          if [ -d "gh-pages/allure-results" ] && \
-             [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
-             
-            echo "Found previous allure-results"
+          if [ -d "gh-pages/allure-results" ] && [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
+            echo "Found previous allure-results."
             cp -R gh-pages/allure-results/. allure-results/
-
             cp -R prev-allure-history/history.jsonl allure-results/
             echo "copying allure history done."
           else
             echo "No previous allure-results found."
           fi
 
+      - name: List Files
+        if: always()
+        run: ls
+
+      - name: Reading Allure History
+        if: always()
+        run: cat allure-results/history.jsonl
+
       - name: Generate Allure Report
         if: always()
         run: npm run allure:generate
-
-      - name: List Files
-        if: always()
-        run: ls -R
 
       - name: List All Branch
         if: always()
@@ -170,7 +171,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./temp-gh-pages
-          keep_files: false
+          keep_files: true
 
       - name: Set Short SHA
         if: always()
