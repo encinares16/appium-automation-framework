@@ -168,10 +168,10 @@ jobs:
       - name: Reading Allure History
         if: always()
         run: |
-          if [ -f "allure-results/history.jsonl" ]
+          if [ -f "allure-results/history.jsonl" ]; then
             cat allure-results/history.jsonl
           else
-            echo "No previous allure-results found."
+            echo "No previous allure history found."
           fi
 
       - name: Generate Allure Report
