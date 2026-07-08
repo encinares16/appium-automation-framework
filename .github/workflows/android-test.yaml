@@ -156,8 +156,6 @@ jobs:
           if [ -d "gh-pages/allure-results" ] && [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
             echo "Found previous allure-results."
             cp -R gh-pages/allure-results/. allure-results/
-
-            cat prev-allure-history/history.jsonl >> allure-results/history.jsonl && printf '\n' >> allure-results/history.jsonl
             echo "copying allure history done."
           else
             echo "No previous allure-results found."
