@@ -1,26 +1,41 @@
+import { numberedSteps } from "@/src/utils/customSteps.ts"
 import Page from "@pages/Page.ts"
 
 class LoginPage extends Page {
   
-  get headerTitle() { return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/loginTV"]') }
-
-  get inputUsername() { return $('//android.widget.EditText[@resource-id="com.saucelabs.mydemoapp.android:id/nameET"]') }
-  get inputPassword() { return $('//android.widget.EditText[@resource-id="com.saucelabs.mydemoapp.android:id/passwordET"]') }
-  get buttonLogin() { return $('//android.widget.Button[@content-desc="Tap to login with given credentials"]') }
+  get headerTitle() { return $('id:com.saucelabs.mydemoapp.android:id/loginTV') }
   
-  get nameErrorMessage() {
-    return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/nameErrorTV"]');
+  get inputUsername() { return $('id:com.saucelabs.mydemoapp.android:id/nameET') }
+  get inputPassword() { return $('id:com.saucelabs.mydemoapp.android:id/passwordET') }
+  get buttonLogin() { return $('~Tap to login with given credentials') }  
+
+  get nameErrorMessage() { return $('id:com.saucelabs.mydemoapp.android:id/nameErrorTV') }
+  get passwordErrorMessage() {  return $('id:com.saucelabs.mydemoapp.android:id/passwordErrorTV') }
+  
+  async inputField(field: string, input: string){
+    const menuItem: Record<string, ChainablePromiseElement> = {
+      username: this.inputUsername,
+      password: this.inputPassword,
+    }
+
+    const element = menuItem[field]
+    
+    await element.waitForDisplayed()
+    await numberedSteps.start(`Enter the ${field}. [${input}]`, async () => {
+      await element.setValue(input)
+    })
   }
 
-  get passwordErrorMessage() {
-    return $('//android.widget.TextView[@resource-id="com.saucelabs.mydemoapp.android:id/passwordErrorTV"]');
-  }
-
-  async loginUser(username: string, password: string){
+  async inputCredentials(username: string, password: string){
     await this.headerTitle.waitForDisplayed()
-    await this.inputUsername.setValue(username)
-    await this.inputPassword.setValue(password)
-    await this.buttonLogin.click()
+    await this.inputField('username', username)
+    await this.inputField('password', password)
+  }
+
+  async tapLogin(){
+    await numberedSteps.start('Tap Login.', async () => {
+      await this.buttonLogin.click()
+    })
   }
 }
 

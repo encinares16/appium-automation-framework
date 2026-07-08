@@ -4,6 +4,17 @@ This repository is a demonstration project that replicates the mobile automation
 
 The project includes sample automated tests for the **My Demo App (Sauce Labs)** application, demonstrating core automation concepts such as authentication, user flows, page object modeling, reporting, and CI/CD integration.
 
+### Features
+
+- Android mobile automation using WebdriverIO & Appium
+- Page Object Model architecture
+- TypeScript support
+- Custom assertion layer
+- Custom CLI logger
+- Allure Report 3 integration
+- Slack Integration (Notifications)
+- GitHub Actions CI/CD
+
 ### Tools & Frameworks Used
 
 1. **Appium** – Mobile automation framework used to interact with mobile applications on real devices and emulators for both Android and iOS.
@@ -16,24 +27,31 @@ The project includes sample automated tests for the **My Demo App (Sauce Labs)**
 
 5. **Page Object Model (POM)** – Design pattern used to improve test maintainability and scalability by separating test logic from UI element locators and page actions. Each application screen is represented as a reusable page class containing its elements and interaction methods.
 
-6. **Mocha** – Test runner used to structure and execute test cases in a readable, BDD/TDD-style format.
+6. **TypeScript** – Provides static typing, improved code maintainability, and better developer experience through IntelliSense and compile-time error checking.
 
-7. **Custom Logger** – Logging utility implemented with silent mode support to control console output during test execution. It provides structured execution logs, captures important test events, improves debugging, tracks failures, and allows logs to be stored or reviewed without displaying unnecessary information in the command line interface.
+7. **Mocha** – Test runner used to structure and execute test cases in a readable, BDD/TDD-style format.
 
-8. **Allure Report 3** – Reporting tool that generates detailed, visual test reports with steps, attachments, and test history to track automation quality.
+8. **GitHub Actions** – CI/CD automation used to generate and deploy Allure reports directly to GitHub Pages for easy access and sharing.
 
-9. **GitHub Actions** – CI/CD automation used to generate and deploy Allure reports directly to GitHub Pages for easy access and sharing.
+9. **Allure Report 3** – Reporting tool that generates detailed, visual test reports with steps, attachments, and test history to track automation quality.
 
+10. **Slack Integration** - Sends CI build status, test execution results, and Allure report notifications to Slack.
 
-## 📱 Application Under Test
-**My Demo App (Sauce Labs)**
+11. **Custom Logger** – Logging utility implemented with silent mode support to control console output during test execution. It provides structured execution logs, captures important test events, improves debugging, tracks failures, and allows logs to be stored or reviewed without displaying unnecessary information in the command line interface.
+
+## 📱 Application Under Test: My Demo App (Sauce Labs)
+
+**Allure Report 3 Integration**
 
 ![2FA Authenticator Screenshot](docs/allure-screenshot.png)
 
+**Slack Integration**
+
+![Slack Integration Screenshot](docs/slack-integration.png)
+
 **Custom Logger: Command Line Interface (CLI)**
 
-![2FA Authenticator Screenshot](docs/custom-logger-cli.png)
-
+![CLI Screenshot](docs/custom-logger-cli.png)
 
 ## Project Structure
 
@@ -51,12 +69,14 @@ wdio-appium-automation/
 │   ├── types/
 │   └── utils/
 ├── tests/
-│   └── *.spec.ts
+│   └── specs/
+│       └── *.spec.ts
 ├── .env
 ├── .env.example
 ├── .gitignore
 ├── package-lock.json
 ├── package.json
+├── allurerc.json
 ├── tsconfig.json
 ├── wdio.conf.ts
 └── README.md

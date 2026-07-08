@@ -2,8 +2,7 @@ name: Android Emulator Tests
 
 on:
   push:
-    branches:
-      - ci/setup-slack-alerts
+    branches: [main, develop, ci/fix-allure-report-history]
 
 env:
   DOTENV_CONFIG_QUIET: true
@@ -74,10 +73,10 @@ jobs:
             adb devices
             adb shell getprop ro.build.version.release
 
-            echo "Installing APK..."
+            echo "[ADB] Installing My Demo App (SauceLabs)..."
             adb install -r ./app/app.apk
 
-            echo "Running WDIO tests..."
+            echo "[TEST] Running automated tests..."
             npm run wdio
 
       - name: Extract Allure summary
@@ -106,59 +105,32 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: Restore Allure History
+      - name: Restore Allure 3 History
         if: always()
         run: |
           mkdir -p allure-results
-          mkdir -p prev-allure-history
-
-          if [ -f "gh-pages/allure-history/history.jsonl" ]; then
-            cat gh-pages/allure-history/history.jsonl
-            echo "Found history.jsonl"
-
-            cat gh-pages/allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> prev-allure-history/history.jsonl
-            echo "copying allure history done."
-
-            cat prev-allure-history/history.jsonl
-            echo "Reading previous history done."
+          if [ -f "gh-pages/allure-results/history.jsonl" ]; then
+            echo "[ALLURE] Found previous Allure 3 history.jsonl file."
+            cp gh-pages/allure-results/history.jsonl allure-results/
+          elif [ -f "gh-pages/allure-history/history.jsonl" ]; then
+            echo "[ALLURE] Found history in old fallback location."
+            cp gh-pages/allure-history/history.jsonl allure-results/
           else
-            echo "No previous history found."
-          fi
-
-      - name: Restore Previous Allure Results
-        if: always()
-        run: |
-          if [ -d "gh-pages/allure-results" ] && \
-             [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
-             
-            echo "Found previous allure-results"
-            cp -R gh-pages/allure-results/. allure-results/
-
-            cp -R prev-allure-history/history.jsonl allure-results/
-            echo "copying allure history done."
-          else
-            echo "No previous allure-results found."
+            echo "[ALLURE] No previous history file found. This might be the first run."
           fi
 
       - name: Generate Allure Report
         if: always()
         run: npm run allure:generate
 
-      - name: List Files
-        if: always()
-        run: ls -R
-
-      - name: List All Branch
-        if: always()
-        run: git branch -a
-
       - name: Copy Files to temp-gh-pages
         if: always()
         run: |
-          [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
-          [ -f "prev-allure-history/history.jsonl" ] && cat prev-allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> allure-history/history.jsonl
-          [ -d "allure-history" ] && cp -R allure-history temp-gh-pages/
-          [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
+          echo "[ALLURE] Copying updated results and history..."
+          cp -R allure-results ./temp-gh-pages/
+
+          echo "[ALLURE] Copying generated HTML report..."
+          cp -R allure-report ./temp-gh-pages/
 
       - name: List Files in temp-gh-pages
         if: always()
@@ -171,7 +143,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./temp-gh-pages
-          keep_files: true
+          keep_files: false
 
       - name: Set Short SHA
         if: always()
@@ -277,7 +249,7 @@ jobs:
                           "type": "button",
                           "text": {
                             "type": "plain_text",
-                            "text": ":allure-logo: Allure Report"
+                            "text": ":allure-logo: View Allure Report"
                           },
                           "url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/",
                           "style": "primary"
