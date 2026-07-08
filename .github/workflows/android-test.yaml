@@ -73,11 +73,11 @@ jobs:
             adb devices
             adb shell getprop ro.build.version.release
 
-            echo "Installing APK..."
+            echo "[ADB] Installing My Demo App (SauceLabs)..."
             adb install -r ./app/app.apk
 
-            echo "Running WDIO tests..."
-            npm run wdio:spec
+            echo "[TEST] Running automated tests..."
+            npm run wdio
 
       - name: Extract Allure summary
         if: always()
@@ -105,43 +105,37 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      # ALLURE 3 RESTORE: Move the last run's history file directly into your new results
       - name: Restore Allure 3 History
         if: always()
         run: |
           mkdir -p allure-results
           if [ -f "gh-pages/allure-results/history.jsonl" ]; then
-            echo "Found previous Allure 3 history.jsonl file."
+            echo "[ALLURE] Found previous Allure 3 history.jsonl file."
             cp gh-pages/allure-results/history.jsonl allure-results/
           elif [ -f "gh-pages/allure-history/history.jsonl" ]; then
-            echo "Found history in old fallback location."
+            echo "[ALLURE] Found history in old fallback location."
             cp gh-pages/allure-history/history.jsonl allure-results/
           else
-            echo "No previous history file found. This might be the first run."
+            echo "[ALLURE] No previous history file found. This might be the first run."
           fi
 
-      # ALLURE 3 GENERATE: Reads raw results + your restored history.jsonl,
-      # and updates history.jsonl automatically inside allure-results.
       - name: Generate Allure Report
         if: always()
         run: npm run allure:generate
 
-      # ALLURE 3 PREPARE DEPLOY: Copy everything cleanly to the deployment directory
-      # No manual file appending needed! Allure 3 already handled it.
       - name: Copy Files to temp-gh-pages
         if: always()
         run: |
-          echo "Copying updated results and history..."
+          echo "[ALLURE] Copying updated results and history..."
           cp -R allure-results ./temp-gh-pages/
 
-          echo "Copying generated HTML report..."
+          echo "[ALLURE] Copying generated HTML report..."
           cp -R allure-report ./temp-gh-pages/
 
       - name: List Files in temp-gh-pages
         if: always()
         run: ls -R ./temp-gh-pages
 
-      # DEPLOY: This pushes your new report, history.jsonl, and results back to gh-pages
       - name: Deploy to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
@@ -149,7 +143,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./temp-gh-pages
-          keep_files: false # Set to false so old HTML files don't pollute, your
+          keep_files: false
 
       - name: Set Short SHA
         if: always()
