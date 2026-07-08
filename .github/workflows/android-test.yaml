@@ -105,97 +105,43 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: Remove allure-report Folder
-        if: always()
-        run: |
-          if [ -d "gh-pages/allure-report" ]; then
-            rm -rf gh-pages/allure-report
-            echo "Removed allure-report folder."
-          else
-            echo "allure-report folder does not exist."
-          fi
-
-      - name: Commit and Push Changes
-        if: always()
-        working-directory: gh-pages
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add -A
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Remove allure-report"
-            git push origin gh-pages
-          fi
-
-      - name: Restore Allure History
+      # ALLURE 3 RESTORE: Move the last run's history file directly into your new results
+      - name: Restore Allure 3 History
         if: always()
         run: |
           mkdir -p allure-results
-          mkdir -p prev-allure-history
-
-          if [ -f "gh-pages/allure-history/history.jsonl" ]; then
-            cat gh-pages/allure-history/history.jsonl
-            echo "Found history.jsonl"
-
-            cat gh-pages/allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> prev-allure-history/history.jsonl
-            echo "copying allure history done."
-
-            cat prev-allure-history/history.jsonl
-            echo "Reading previous history done."
+          if [ -f "gh-pages/allure-results/history.jsonl" ]; then
+            echo "Found previous Allure 3 history.jsonl file."
+            cp gh-pages/allure-results/history.jsonl allure-results/
+          elif [ -f "gh-pages/allure-history/history.jsonl" ]; then
+            echo "Found history in old fallback location."
+            cp gh-pages/allure-history/history.jsonl allure-results/
           else
-            echo "No previous history found."
+            echo "No previous history file found. This might be the first run."
           fi
 
-      - name: Restore Previous Allure Results
-        if: always()
-        run: |
-          if [ -d "gh-pages/allure-results" ] && [ "$(find gh-pages/allure-results -type f | wc -l)" -gt 0 ]; then
-            echo "Found previous allure-results."
-            cp -R gh-pages/allure-results/. allure-results/
-            echo "copying allure results done."
-          else
-            echo "No previous allure-results found."
-          fi
-
-      - name: List Files
-        if: always()
-        run: ls
-
-      - name: Reading Allure History
-        if: always()
-        run: |
-          if [ -f "prev-allure-history/history.jsonl" ]; then
-            cp -R prev-allure-history/history.jsonl allure-results/
-            cat allure-results/history.jsonl
-            echo "Copy prev allure history done."
-          else
-            echo "No previous allure history found."
-          fi
-
+      # ALLURE 3 GENERATE: Reads raw results + your restored history.jsonl,
+      # and updates history.jsonl automatically inside allure-results.
       - name: Generate Allure Report
         if: always()
         run: npm run allure:generate
 
-      - name: List All Branch
-        if: always()
-        run: git branch -a
-
+      # ALLURE 3 PREPARE DEPLOY: Copy everything cleanly to the deployment directory
+      # No manual file appending needed! Allure 3 already handled it.
       - name: Copy Files to temp-gh-pages
         if: always()
         run: |
-          [ -d "allure-results" ] && cp -R allure-results temp-gh-pages/
-          [ -f "prev-allure-history/history.jsonl" ] && cat prev-allure-history/history.jsonl >> prev-allure-history/history.jsonl && printf '\n' >> allure-history/history.jsonl
-          [ -d "allure-history" ] && cp -R allure-history temp-gh-pages/
-          [ -d "allure-report" ] && cp -R allure-report temp-gh-pages/
+          echo "Copying updated results and history..."
+          cp -R allure-results ./temp-gh-pages/
+
+          echo "Copying generated HTML report..."
+          cp -R allure-report ./temp-gh-pages/
 
       - name: List Files in temp-gh-pages
         if: always()
         run: ls -R ./temp-gh-pages
 
+      # DEPLOY: This pushes your new report, history.jsonl, and results back to gh-pages
       - name: Deploy to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
@@ -203,7 +149,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./temp-gh-pages
-          keep_files: true
+          keep_files: false # Set to false so old HTML files don't pollute, your
 
       - name: Set Short SHA
         if: always()
