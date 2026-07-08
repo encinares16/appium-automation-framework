@@ -2,7 +2,7 @@ name: Android Emulator Tests
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, ci/fix-allure-report-history]
 
 env:
   DOTENV_CONFIG_QUIET: true
@@ -170,7 +170,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./temp-gh-pages
-          keep_files: true
+          keep_files: false
 
       - name: Set Short SHA
         if: always()
