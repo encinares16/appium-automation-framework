@@ -47,12 +47,11 @@ The project includes sample automated tests for the **My Demo App (Sauce Labs)**
 
 **Slack Integration**
 
-![2FA Authenticator Screenshot](docs/slack-integration.png)
-
+![Slack Integration Screenshot](docs/slack-integration.png)
 
 **Custom Logger: Command Line Interface (CLI)**
 
-![2FA Authenticator Screenshot](docs/custom-logger-cli.png)
+![CLI Screenshot](docs/custom-logger-cli.png)
 
 ## Project Structure
 
